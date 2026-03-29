@@ -22,7 +22,6 @@ module decoder_tb;
 	wire [31:0] imm;
 	
 	decoder dut (
-		.clk(clk),
 		.inst(inst),
 		.rs1(rs1),
 		.rs2(rs2),

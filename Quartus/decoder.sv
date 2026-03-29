@@ -1,6 +1,5 @@
 module decoder
 (
-	input wire clk,
 	input wire [31:0] inst,
 	output reg [4:0] rs1,
 	output reg [4:0] rs2,
