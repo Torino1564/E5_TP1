@@ -16,7 +16,7 @@ module decoder
 	assign opcode = inst[6:0];
 	
 	// Resolve instruction type
-	
+	reg [2:0] inst_type;
 	always @(*) begin
 		case (opcode)
 			7'b0000011: inst_type = R;	// LOAD
