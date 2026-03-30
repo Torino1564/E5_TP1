@@ -8,12 +8,55 @@ module ram_tb;
 	wire clock_a_sig, clock_b_sig;
 	reg rden_a_sig, rden_b_sig, wren_a_sig, wren_b_sig;
 	
+	reg [12:0] address_a_sig, address_b_sig;
+	
 	reg [31:0] data_a_sig, data_b_sig;
 	wire [31:0] q_a_sig, q_b_sig;
 	
 	wire [31:0] data_a_port, data_b_port;
-	// assign data_a_port = rden_a_sig ? ( wren_a_sig ?  ) : 'z;
-
+	assign data_a_port = rden_a_sig | wren_a_sig ? ( wren_a_sig ? data_a_sig : q_a_sig ) : 'z;
+	assign data_b_port = rden_b_sig | wren_b_sig ? ( wren_b_sig ? data_b_sig : q_b_sig ) : 'z;
+	
+	assign clock_a_sig = clk;
+	assign clock_b_sig = clk;
+	
+	always begin
+		#5 clk = ~clk;
+	end
+	
+	initial begin
+		clk = 0;
+		#5
+		enable_a_sig = 'b1;
+		enable_b_sig = 'b1;
+		byteena_a_sig = 4'b1111;
+		byteena_b_sig = 4'b1111;
+		rden_a_sig = 'b1;
+		rden_b_sig = 'b1;
+		
+		#20
+		data_a_sig = 32'hFFFF;
+		address_a_sig = 'b0;
+		wren_a_sig = 'b1;
+		
+		data_b_sig = 32'hEEEE;
+		address_b_sig = 'd1;
+		wren_b_sig = 'b1;
+		
+		#20
+		data_a_sig = 'z;
+		data_b_sig = 'z;
+		wren_a_sig = 'b0;
+		wren_b_sig = 'b0;
+		
+		address_b_sig = 'b0;
+		address_a_sig = 'd1;
+		
+		#20
+		rden_a_sig = 'b0;
+		rden_b_sig = 'b0;
+	end
+	
 	ram	ram_inst (
 		.aclr_a ( aclr_a_sig ),
 		.aclr_b ( aclr_b_sig ),
