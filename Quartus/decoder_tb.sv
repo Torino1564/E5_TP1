@@ -23,6 +23,7 @@ module decoder_tb;
 	
 	decoder dut (
 		.inst(inst),
+		
 		.rs1(rs1),
 		.rs2(rs2),
 		.rd(rd),

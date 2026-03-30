@@ -1,6 +1,7 @@
 module decoder
 (
 	input wire [31:0] inst,
+	
 	output reg [4:0] rs1,
 	output reg [4:0] rs2,
 	output reg [4:0] rd,
@@ -9,6 +10,7 @@ module decoder
 	output reg [6:0] func7,
 	output reg [31:0] imm
 );
+
 	// Define instruction types
 	enum bit[2:0] {R, I, S, B, U, J, E} 	INST_TYPE;
 	
@@ -16,7 +18,7 @@ module decoder
 	
 	// Resolve instruction type
 	reg [2:0] inst_type;
-	always @(*) begin
+	always_comb begin
 		case (opcode)
 			7'b0000011: inst_type = R;	// LOAD
 			7'b0110011: inst_type = I;	// OP
@@ -40,8 +42,8 @@ module decoder
 				func3 = inst[14:12];
 			end
 			default: begin
-				func3 = func3;
-				rs1 = rs1;
+				func3 = 'z;
+				rs1 = 'z;
 			end
 		endcase
 	end
@@ -53,7 +55,7 @@ module decoder
 				rs2 = inst[24:20];
 			end
 			default: begin
-				rs2 = rs2;
+				rs2 = 'z;
 			end
 		endcase
 	end
@@ -65,7 +67,7 @@ module decoder
 				rd = inst[11:7];
 			end
 			default: begin
-				rd = rd;
+				rd = 'z;
 			end
 		endcase
 	end
@@ -77,7 +79,7 @@ module decoder
 				func7 = inst[31:25];
 			end
 			default: begin
-				func7 = func7;
+				func7 = 'z;
 			end
 		endcase
 	end
@@ -108,7 +110,7 @@ module decoder
 				imm[19:12] = inst[19:12];
 			end
 			default: begin
-				imm = imm;
+				imm = 'z;
 			end
 		endcase
 	end
