@@ -1,3 +1,5 @@
+import opcodes::*;
+
 module decoder
 (
 	input wire [31:0] inst,
@@ -20,14 +22,14 @@ module decoder
 	reg [2:0] inst_type;
 	always_comb begin
 		case (opcode)
-			7'b0000011: inst_type = R;	// LOAD
-			7'b0110011: inst_type = I;	// OP
-			7'b1010011: inst_type = I;	// OP-IMM
-			7'b0100011: inst_type = S;	// STORE
-			7'b1100011: inst_type = B;	// BRANCH
-			7'b1101111: inst_type = J;	// JAL
-			7'b0110111: inst_type = U;	// LUI
-			7'b0010111: inst_type = U;	// AUIPC
+			LOAD: 		inst_type = R;	// LOAD
+			OP: 			inst_type = I;	// OP
+			OP_IMM: 		inst_type = I;	// OP-IMM
+			STORE: 		inst_type = S;	// STORE
+			BRANCH: 		inst_type = B;	// BRANCH
+			JAL: 			inst_type = J;	// JAL
+			LUI: 			inst_type = U;	// LUI
+			AUIPC: 		inst_type = U;	// AUIPC
 			default:		inst_type = E; // ERROR
 		endcase
 	end
@@ -35,7 +37,7 @@ module decoder
 	// Assign outputs
 	
 	// RS1 & Func3
-	always @(*) begin
+	always_comb begin
 		case (inst_type)
 			R, I, S, B: begin 
 				rs1 = inst[19:15];
@@ -49,7 +51,7 @@ module decoder
 	end
 	
 	// RS2
-	always @(*) begin
+	always_comb begin
 		case (inst_type)
 			R, S, B: begin 
 				rs2 = inst[24:20];
@@ -61,7 +63,7 @@ module decoder
 	end
 	
 	// RD
-	always @(*) begin
+	always_comb begin
 		case (inst_type)
 			R, I, U, J: begin 
 				rd = inst[11:7];
@@ -73,7 +75,7 @@ module decoder
 	end
 	
 	// Func7
-	always @(*) begin
+	always_comb begin
 		case (inst_type)
 			R: begin 
 				func7 = inst[31:25];
@@ -85,7 +87,8 @@ module decoder
 	end
 	
 	// Imm
-	always @(*) begin
+	always_comb begin
+		imm = 'z;
 		case (inst_type)
 			I: begin 
 				imm[11:0] = inst[31:20];
@@ -109,9 +112,8 @@ module decoder
 				imm[11] = inst[20];
 				imm[19:12] = inst[19:12];
 			end
-			default: begin
+			default: 
 				imm = 'z;
-			end
 		endcase
 	end
 	

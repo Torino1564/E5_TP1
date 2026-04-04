@@ -17,7 +17,10 @@ module ALU(
 			SUB: result = A - B;
 			AND: result = A & B;
 			OR: result = A | B;
-			XOR: result = A^B;
+			XOR: result = A ^ B;
+			LESS: result = A < B;
+			LESSEQ: result = A <= B;
+			EQ: result = A	== B;
 			default: result = 'z;
 		endcase
 	end

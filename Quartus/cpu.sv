@@ -2,10 +2,40 @@ module cpu (
 	input wire clk,
 	input wire n_rst
 );
+	reg [31:0] pc = 'b0;
 	
+	wire [31:0] inst;
+	wire [31:0] rs1data, rs2data, imm;
+	
+	always @(posedge clk) begin
+		if (~n_rst) begin
+			pc <= 'b0;
+		end
+		else
+			pc <= pc + 'd4;
+	end
+	
+	reg [12:0] address_sig;
+	wire [31:0] q_sig;
+	assign address_sig = pc[12:0];
+	
+	assign inst = q_sig;
 	reg [6:0] op;
 	reg [31:0] A;
 	reg [31:0] B;
+	
+	operand_builder operand_builder_inst (
+		.rs1data(rs1data),
+		.rs2data(rs2data),
+		.imm(imm),
+		.pc(pc),
+		.func3(func3),
+		.func7(func7),
+		.opcode(opcode),
+		.A(A),
+		.B(B),
+		.op(op)
+	);
 	
 	wire [31:0] result;
 	ALU alu_inst (
@@ -22,7 +52,7 @@ module cpu (
 	wire clock_a_sig, clock_b_sig;
 	reg rden_a_sig, rden_b_sig, wren_a_sig, wren_b_sig;
 	
-	reg [12:0] address_a_sig, address_b_sig;
+	wire [12:0] address_a_sig, address_b_sig;
 	
 	reg [31:0] data_a_sig, data_b_sig;
 	wire [31:0] q_a_sig, q_b_sig;
@@ -30,6 +60,8 @@ module cpu (
 	wire [31:0] data_a_port, data_b_port;
 	assign data_a_port = rden_a_sig | wren_a_sig ? ( wren_a_sig ? data_a_sig : q_a_sig ) : 'z;
 	assign data_b_port = rden_b_sig | wren_b_sig ? ( wren_b_sig ? data_b_sig : q_b_sig ) : 'z;
+	
+	assign address_a_sig = rs1data[12:0] + imm[12:0];
 	
 	assign clock_a_sig = clk;
 	assign clock_b_sig = clk;
@@ -56,9 +88,8 @@ module cpu (
 		);
 	
 	// Register bank
-	reg [4:0] rs1, rs2, rd;
-	wire [31:0] rs1data, rs2data;
-	reg [31:0] mem_read_out, rddata, imm;
+	wire [4:0] rs1, rs2, rd;
+	wire [31:0] mem_read_out;
 	
 	reg inst_write_mem, inst_read_mem, inst_write_rd;
 	reg mem_ready;
@@ -82,7 +113,7 @@ module cpu (
 		.rs1data(rs1data) ,	// output [(WSIZE-1):0] rs1data
 		.rs2data(rs2data) ,	// output [(WSIZE-1):0] rs2data
 		.rd(rd) ,	// input [(ADD_BUS_WIDTH-1):0] rd
-		.rddata(rddata) ,	// input [(WSIZE-1):0] rddata
+		.rddata(result) ,	// input [(WSIZE-1):0] rddata
 		.mem_data_port(mem_data_port) ,	// inout [(WSIZE-1):0] mem_data_port
 		.mem_write(mem_write) ,	// output  mem_write
 		.mem_ready(mem_ready) ,	// input  mem_ready
@@ -96,10 +127,14 @@ module cpu (
 	//  ROM
 	
 	reg inaclr_sig, outaclr_sig, inclocken_sig, outclocken_sig, rden_sig;
-	
-	reg [12:0] address_sig;
-	wire [31:0] q_sig;
 	wire inclock_sig, outclock_sig;
+	
+	assign inaclr_sig = 0;
+	assign outaclr_sig = 0;
+	assign inclocken_sig = 1;
+	assign outclocken_sig = 1;
+	assign rden_sig = 1;
+	
 	assign inclock_sig = clk;
 	assign outclock_sig = clk;
 	
@@ -117,25 +152,15 @@ module cpu (
 	);
 	
 	// Decoder
-	reg [31:0] inst = 32'b0;
-	wire [4:0] rs1_dc;
-	wire [4:0] rs2_dc;
-	wire [4:0] rd_dc;
-	wire [6:0] opcode_dc;
-	wire [2:0] func3_dc;
-	wire [6:0] func7_dc;
-	wire [31:0] imm_dc;
-	
 	decoder dut (
-		.inst(inst_dc),
-		
-		.rs1(rs1_dc),
-		.rs2(rs2_dc),
-		.rd(rd_dc),
-		.opcode(opcode_dc),
-		.func3(func3_dc),
-		.func7(func7_dc),
-		.imm(imm_dc)
+		.inst(inst),
+		.rs1(rs1),
+		.rs2(rs2),
+		.rd(rd),
+		.opcode(opcode),
+		.func3(func3),
+		.func7(func7),
+		.imm(imm)
 	);
 	
 endmodule
