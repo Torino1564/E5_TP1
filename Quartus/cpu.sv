@@ -12,12 +12,12 @@ module cpu (
 			pc <= 'b0;
 		end
 		else
-			pc <= pc + 'd1;
+			pc <= pc + 'd4;
 	end
 	
 	reg [12:0] address_sig;
 	wire [31:0] q_sig;
-	assign address_sig = pc[12:0];
+	assign address_sig = pc[14:2];
 	
 	assign inst = {q_sig[7:0], q_sig[15:8], q_sig[23:16], q_sig[31:24]};
 	reg [6:0] op;
@@ -100,10 +100,8 @@ module cpu (
 	wire [31:0] mem_data_port;
 	reg [31:0] mem_data_drive;
 	logic mem_data_drive_enable;
-	wire [31:0] mem_data_recv;
 	
 	assign mem_data_port = mem_data_drive_enable ? mem_data_drive : 'z;
-	assign mem_data_recv = mem_data_drive_enable ? 'z : mem_data_port;
 	
 	assign data_a_port = mem_data_port;
 	
