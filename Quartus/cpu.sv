@@ -12,15 +12,18 @@ module cpu (
 			pc <= 'b0;
 		end
 		else
-			pc <= pc + 'd4;
+			pc <= pc + 'd1;
 	end
 	
 	reg [12:0] address_sig;
 	wire [31:0] q_sig;
 	assign address_sig = pc[12:0];
 	
-	assign inst = q_sig;
+	assign inst = {q_sig[7:0], q_sig[15:8], q_sig[23:16], q_sig[31:24]};
 	reg [6:0] op;
+	wire [6:0] opcode;
+	wire [2:0] func3;
+	wire [6:0] func7;
 	reg [31:0] A;
 	reg [31:0] B;
 	
@@ -91,7 +94,7 @@ module cpu (
 	wire [4:0] rs1, rs2, rd;
 	wire [31:0] mem_read_out;
 	
-	reg inst_write_mem, inst_read_mem, inst_write_rd;
+	wire inst_write_mem, inst_read_mem, inst_write_rd;
 	reg mem_ready;
 	
 	wire [31:0] mem_data_port;
@@ -152,7 +155,7 @@ module cpu (
 	);
 	
 	// Decoder
-	decoder dut (
+	decoder decoder_inst (
 		.inst(inst),
 		.rs1(rs1),
 		.rs2(rs2),
@@ -160,7 +163,8 @@ module cpu (
 		.opcode(opcode),
 		.func3(func3),
 		.func7(func7),
-		.imm(imm)
+		.imm(imm),
+		.inst_write_rd(inst_write_rd)
 	);
 	
 endmodule

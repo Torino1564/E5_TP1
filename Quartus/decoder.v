@@ -10,9 +10,7 @@ module decoder
 	output wire [6:0] opcode,
 	output reg [2:0] func3,
 	output reg [6:0] func7,
-	output reg [31:0] imm,
-	
-	output reg inst_write_rd
+	output reg [31:0] imm
 );
 
 	// Define instruction types
@@ -37,17 +35,6 @@ module decoder
 	end
 	
 	// Assign outputs
-	
-	// Inst Write RD
-	always_comb begin
-		case (inst_type)
-			R, I:
-				inst_write_rd = 1'b1;
-			default:
-				inst_write_rd = 1'b0;
-		endcase
-	end
-	
 	
 	// RS1 & Func3
 	always_comb begin
@@ -101,10 +88,10 @@ module decoder
 	
 	// Imm
 	always_comb begin
-		imm = '0;
+		imm = 'z;
 		case (inst_type)
 			I: begin 
-				imm = {{20{inst[31]}}, inst[31:20]};
+				imm[11:0] = inst[31:20];
 			end
 			S: begin 
 				imm[11:5] = inst[31:25];

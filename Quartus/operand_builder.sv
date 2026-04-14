@@ -31,10 +31,14 @@ module operand_builder (
 					B = imm;
 				case (func3)
 					3'b000: begin
-						if (func7[5] == 0)
-							op = ADD;
+						if (opcode == OP) begin
+							if (func7[5] == 0)
+								op = ADD;
+							else
+								op = SUB;
+						end
 						else
-							op = SUB;
+							op = ADD;
 					end
 					3'b001: begin
 						

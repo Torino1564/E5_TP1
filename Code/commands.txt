@@ -1,0 +1,3 @@
+riscv-none-elf-gcc -nostdlib -o output.elf -march=rv32i -mabi=ilp32 -ffreestanding -T link.ld main.c
+
+riscv-none-elf-objcopy -O ihex output.elf program_rom.hex
