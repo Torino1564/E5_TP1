@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-static const char STATIC = 69;
+static char STATIC = 69;
 
 int main()
 {

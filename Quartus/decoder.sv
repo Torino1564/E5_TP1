@@ -12,7 +12,9 @@ module decoder
 	output reg [6:0] func7,
 	output reg [31:0] imm,
 	
-	output reg inst_write_rd
+	output reg inst_write_pc_jal,
+	output reg inst_write_rd,
+	output reg inst_change_pc
 );
 
 	// Define instruction types
@@ -38,13 +40,33 @@ module decoder
 	
 	// Assign outputs
 	
+	// Inst Write PC Jal
+	always_comb begin
+		case (inst_type)
+			J:
+				inst_write_pc_jal = 1'b1;
+			default:
+				inst_write_pc_jal = 1'b0;
+		endcase
+	end
+	
 	// Inst Write RD
 	always_comb begin
 		case (inst_type)
-			R, I:
+			R, I, J:
 				inst_write_rd = 1'b1;
 			default:
 				inst_write_rd = 1'b0;
+		endcase
+	end
+	
+	// Inst Change PC
+	always_comb begin
+		case (inst_type)
+			B, J:
+				inst_change_pc = 1'b1;
+			default:
+				inst_change_pc = 1'b0;
 		endcase
 	end
 	

@@ -15,8 +15,14 @@ module operand_builder (
 	output reg [31:0] A,
 	output reg [31:0] B,
 	
-	output reg [6:0] op
+	output reg [6:0] op,
+	
+	output wire [31:0] pc_jal
 );
+	
+	wire is_jal;
+	assign is_jal = opcode == JAL;
+	assign pc_jal = is_jal ? pc + 32'd4 : 'z;
 	
 	always_comb begin
 		A = 'z;
@@ -54,6 +60,11 @@ module operand_builder (
 					end
 					default: begin end
 				endcase
+			end
+			JAL: begin
+				A = pc;
+				B = imm;
+				op = ADD;
 			end
 			default: begin
 			end
