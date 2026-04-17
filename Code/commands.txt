@@ -1,3 +1,5 @@
 riscv-none-elf-gcc -o output.elf -march=rv32i -mabi=ilp32 -T link.ld main.c bootloader.s -ffreestanding -nostartfiles
 
-riscv-none-elf-objcopy -O ihex output.elf program_rom.hex
+riscv-none-elf-gcc -o output.elf -march=rv32i -mabi=ilp32 main.s -ffreestanding -nostartfiles
+
+riscv-none-elf-objcopy -O ihex output.elf output.hex

@@ -7,6 +7,7 @@ package opcodes;
 			STORE		=  7'b0100011,
 			BRANCH	=  7'b1100011,
 			JAL		=  7'b1101111,
+			JALR		= 	7'b1100111,
 			LUI		=  7'b0110111,
 			AUIPC		=  7'b0010111
 	} Opcodes;

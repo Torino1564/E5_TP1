@@ -33,25 +33,27 @@
 //on the Quartus Prime software download page.
 
 module rom (
+	aclr_a,
+	aclr_b,
 	address_a,
 	address_b,
-	inclock,
-	inclocken,
-	out_aclr,
-	outclock,
-	outclocken,
+	clock_a,
+	clock_b,
+	enable_a,
+	enable_b,
 	rden_a,
 	rden_b,
 	q_a,
 	q_b);
 
+	input	  aclr_a;
+	input	  aclr_b;
 	input	[12:0]  address_a;
 	input	[12:0]  address_b;
-	input	  inclock;
-	input	  inclocken;
-	input	  out_aclr;
-	input	  outclock;
-	input	  outclocken;
+	input	  clock_a;
+	input	  clock_b;
+	input	  enable_a;
+	input	  enable_b;
 	input	  rden_a;
 	input	  rden_b;
 	output	[31:0]  q_a;
@@ -59,10 +61,11 @@ module rom (
 `ifndef ALTERA_RESERVED_QIS
 // synopsys translate_off
 `endif
-	tri1	  inclock;
-	tri1	  inclocken;
-	tri0	  out_aclr;
-	tri1	  outclocken;
+	tri0	  aclr_a;
+	tri0	  aclr_b;
+	tri1	  clock_a;
+	tri1	  enable_a;
+	tri1	  enable_b;
 	tri1	  rden_a;
 	tri1	  rden_b;
 `ifndef ALTERA_RESERVED_QIS
@@ -92,7 +95,7 @@ endmodule
 // Retrieval info: PRIVATE: CLRrren NUMERIC "0"
 // Retrieval info: PRIVATE: CLRwraddress NUMERIC "0"
 // Retrieval info: PRIVATE: CLRwren NUMERIC "0"
-// Retrieval info: PRIVATE: Clock NUMERIC "2"
+// Retrieval info: PRIVATE: Clock NUMERIC "5"
 // Retrieval info: PRIVATE: Clock_A NUMERIC "0"
 // Retrieval info: PRIVATE: Clock_B NUMERIC "0"
 // Retrieval info: PRIVATE: IMPLEMENT_IN_LES NUMERIC "0"
@@ -106,14 +109,14 @@ endmodule
 // Retrieval info: PRIVATE: MAXIMUM_DEPTH NUMERIC "0"
 // Retrieval info: PRIVATE: MEMSIZE NUMERIC "262144"
 // Retrieval info: PRIVATE: MEM_IN_BITS NUMERIC "0"
-// Retrieval info: PRIVATE: MIFfilename STRING "program_rom.hex"
+// Retrieval info: PRIVATE: MIFfilename STRING "program.hex"
 // Retrieval info: PRIVATE: OPERATION_MODE NUMERIC "3"
 // Retrieval info: PRIVATE: OUTDATA_ACLR_B NUMERIC "1"
-// Retrieval info: PRIVATE: OUTDATA_REG_B NUMERIC "1"
+// Retrieval info: PRIVATE: OUTDATA_REG_B NUMERIC "0"
 // Retrieval info: PRIVATE: RAM_BLOCK_TYPE NUMERIC "0"
 // Retrieval info: PRIVATE: READ_DURING_WRITE_MODE_MIXED_PORTS NUMERIC "2"
 // Retrieval info: PRIVATE: REGdata NUMERIC "1"
-// Retrieval info: PRIVATE: REGq NUMERIC "1"
+// Retrieval info: PRIVATE: REGq NUMERIC "0"
 // Retrieval info: PRIVATE: REGrdaddress NUMERIC "0"
 // Retrieval info: PRIVATE: REGrren NUMERIC "1"
 // Retrieval info: PRIVATE: REGwraddress NUMERIC "1"
@@ -132,22 +135,22 @@ endmodule
 // Retrieval info: PRIVATE: enable NUMERIC "1"
 // Retrieval info: PRIVATE: rden NUMERIC "1"
 // Retrieval info: LIBRARY: altera_mf altera_mf.altera_mf_components.all
-// Retrieval info: CONSTANT: ADDRESS_REG_B STRING "CLOCK0"
+// Retrieval info: CONSTANT: ADDRESS_REG_B STRING "CLOCK1"
 // Retrieval info: CONSTANT: CLOCK_ENABLE_INPUT_A STRING "NORMAL"
 // Retrieval info: CONSTANT: CLOCK_ENABLE_INPUT_B STRING "NORMAL"
-// Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_A STRING "NORMAL"
-// Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_B STRING "NORMAL"
-// Retrieval info: CONSTANT: INDATA_REG_B STRING "CLOCK0"
-// Retrieval info: CONSTANT: INIT_FILE STRING "program_rom.hex"
+// Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_A STRING "BYPASS"
+// Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_B STRING "BYPASS"
+// Retrieval info: CONSTANT: INDATA_REG_B STRING "CLOCK1"
+// Retrieval info: CONSTANT: INIT_FILE STRING "program.hex"
 // Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Cyclone V"
 // Retrieval info: CONSTANT: LPM_TYPE STRING "altsyncram"
 // Retrieval info: CONSTANT: NUMWORDS_A NUMERIC "8192"
 // Retrieval info: CONSTANT: NUMWORDS_B NUMERIC "8192"
 // Retrieval info: CONSTANT: OPERATION_MODE STRING "BIDIR_DUAL_PORT"
-// Retrieval info: CONSTANT: OUTDATA_ACLR_A STRING "CLEAR1"
+// Retrieval info: CONSTANT: OUTDATA_ACLR_A STRING "CLEAR0"
 // Retrieval info: CONSTANT: OUTDATA_ACLR_B STRING "CLEAR1"
-// Retrieval info: CONSTANT: OUTDATA_REG_A STRING "CLOCK1"
-// Retrieval info: CONSTANT: OUTDATA_REG_B STRING "CLOCK1"
+// Retrieval info: CONSTANT: OUTDATA_REG_A STRING "UNREGISTERED"
+// Retrieval info: CONSTANT: OUTDATA_REG_B STRING "UNREGISTERED"
 // Retrieval info: CONSTANT: POWER_UP_UNINITIALIZED STRING "FALSE"
 // Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "13"
 // Retrieval info: CONSTANT: WIDTHAD_B NUMERIC "13"
@@ -155,25 +158,27 @@ endmodule
 // Retrieval info: CONSTANT: WIDTH_B NUMERIC "32"
 // Retrieval info: CONSTANT: WIDTH_BYTEENA_A NUMERIC "1"
 // Retrieval info: CONSTANT: WIDTH_BYTEENA_B NUMERIC "1"
-// Retrieval info: CONSTANT: WRCONTROL_WRADDRESS_REG_B STRING "CLOCK0"
+// Retrieval info: CONSTANT: WRCONTROL_WRADDRESS_REG_B STRING "CLOCK1"
+// Retrieval info: USED_PORT: aclr_a 0 0 0 0 INPUT GND "aclr_a"
+// Retrieval info: USED_PORT: aclr_b 0 0 0 0 INPUT GND "aclr_b"
 // Retrieval info: USED_PORT: address_a 0 0 13 0 INPUT NODEFVAL "address_a[12..0]"
 // Retrieval info: USED_PORT: address_b 0 0 13 0 INPUT NODEFVAL "address_b[12..0]"
-// Retrieval info: USED_PORT: inclock 0 0 0 0 INPUT VCC "inclock"
-// Retrieval info: USED_PORT: inclocken 0 0 0 0 INPUT VCC "inclocken"
-// Retrieval info: USED_PORT: out_aclr 0 0 0 0 INPUT GND "out_aclr"
-// Retrieval info: USED_PORT: outclock 0 0 0 0 INPUT NODEFVAL "outclock"
-// Retrieval info: USED_PORT: outclocken 0 0 0 0 INPUT VCC "outclocken"
+// Retrieval info: USED_PORT: clock_a 0 0 0 0 INPUT VCC "clock_a"
+// Retrieval info: USED_PORT: clock_b 0 0 0 0 INPUT NODEFVAL "clock_b"
+// Retrieval info: USED_PORT: enable_a 0 0 0 0 INPUT VCC "enable_a"
+// Retrieval info: USED_PORT: enable_b 0 0 0 0 INPUT VCC "enable_b"
 // Retrieval info: USED_PORT: q_a 0 0 32 0 OUTPUT NODEFVAL "q_a[31..0]"
 // Retrieval info: USED_PORT: q_b 0 0 32 0 OUTPUT NODEFVAL "q_b[31..0]"
 // Retrieval info: USED_PORT: rden_a 0 0 0 0 INPUT VCC "rden_a"
 // Retrieval info: USED_PORT: rden_b 0 0 0 0 INPUT VCC "rden_b"
-// Retrieval info: CONNECT: @aclr1 0 0 0 0 out_aclr 0 0 0 0
+// Retrieval info: CONNECT: @aclr0 0 0 0 0 aclr_a 0 0 0 0
+// Retrieval info: CONNECT: @aclr1 0 0 0 0 aclr_b 0 0 0 0
 // Retrieval info: CONNECT: @address_a 0 0 13 0 address_a 0 0 13 0
 // Retrieval info: CONNECT: @address_b 0 0 13 0 address_b 0 0 13 0
-// Retrieval info: CONNECT: @clock0 0 0 0 0 inclock 0 0 0 0
-// Retrieval info: CONNECT: @clock1 0 0 0 0 outclock 0 0 0 0
-// Retrieval info: CONNECT: @clocken0 0 0 0 0 inclocken 0 0 0 0
-// Retrieval info: CONNECT: @clocken1 0 0 0 0 outclocken 0 0 0 0
+// Retrieval info: CONNECT: @clock0 0 0 0 0 clock_a 0 0 0 0
+// Retrieval info: CONNECT: @clock1 0 0 0 0 clock_b 0 0 0 0
+// Retrieval info: CONNECT: @clocken0 0 0 0 0 enable_a 0 0 0 0
+// Retrieval info: CONNECT: @clocken1 0 0 0 0 enable_b 0 0 0 0
 // Retrieval info: CONNECT: @data_a 0 0 32 0 GND 0 0 32 0
 // Retrieval info: CONNECT: @data_b 0 0 32 0 GND 0 0 32 0
 // Retrieval info: CONNECT: @rden_a 0 0 0 0 rden_a 0 0 0 0
@@ -186,6 +191,6 @@ endmodule
 // Retrieval info: GEN_FILE: TYPE_NORMAL rom.inc FALSE
 // Retrieval info: GEN_FILE: TYPE_NORMAL rom.cmp FALSE
 // Retrieval info: GEN_FILE: TYPE_NORMAL rom.bsf FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL rom_inst.v FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL rom_inst.v TRUE
 // Retrieval info: GEN_FILE: TYPE_NORMAL rom_bb.v TRUE
 // Retrieval info: LIB_FILE: altera_mf

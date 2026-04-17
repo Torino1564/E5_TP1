@@ -16,7 +16,6 @@ module decoder
 	output reg inst_write_rd,
 	output reg inst_change_pc
 );
-
 	// Define instruction types
 	enum bit[2:0] {R, I, S, B, U, J, E} 	INST_TYPE;
 	
@@ -27,11 +26,12 @@ module decoder
 	always_comb begin
 		case (opcode)
 			LOAD: 		inst_type = R;	// LOAD
-			OP: 			inst_type = I;	// OP
+			OP: 			inst_type = R;	// OP
 			OP_IMM: 		inst_type = I;	// OP-IMM
 			STORE: 		inst_type = S;	// STORE
 			BRANCH: 		inst_type = B;	// BRANCH
 			JAL: 			inst_type = J;	// JAL
+			JALR:			inst_type = I;	// JALR
 			LUI: 			inst_type = U;	// LUI
 			AUIPC: 		inst_type = U;	// AUIPC
 			default:		inst_type = E; // ERROR
@@ -42,8 +42,8 @@ module decoder
 	
 	// Inst Write PC Jal
 	always_comb begin
-		case (inst_type)
-			J:
+		case (opcode)
+			JAL, JALR:
 				inst_write_pc_jal = 1'b1;
 			default:
 				inst_write_pc_jal = 1'b0;
@@ -62,8 +62,8 @@ module decoder
 	
 	// Inst Change PC
 	always_comb begin
-		case (inst_type)
-			B, J:
+		case (opcode)
+			JAL, JALR, BRANCH:
 				inst_change_pc = 1'b1;
 			default:
 				inst_change_pc = 1'b0;
@@ -79,8 +79,8 @@ module decoder
 				func3 = inst[14:12];
 			end
 			default: begin
-				func3 = 'z;
-				rs1 = 'z;
+				func3 = '0;
+				rs1 = 'X;
 			end
 		endcase
 	end
@@ -92,7 +92,7 @@ module decoder
 				rs2 = inst[24:20];
 			end
 			default: begin
-				rs2 = 'z;
+				rs2 = 'X;
 			end
 		endcase
 	end

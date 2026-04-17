@@ -27,6 +27,9 @@ module ALU(
 			ULESS: result = u_A < u_B;
 			LESSEQ: result = A <= B;
 			EQ: result = A	== B;
+			SLL: result = A << u_B;
+			SRL: result = A >> u_B;
+			SRA: result = A >>> u_B;
 			default: result = 'z;
 		endcase
 	end

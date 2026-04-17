@@ -17,47 +17,30 @@ module operand_builder (
 	
 	output reg [6:0] op,
 	
-	output wire [31:0] pc_jal
+	output wire [31:0] pc_jal,
+	output reg branch_condition
 );
 	
 	wire is_jal;
-	assign is_jal = opcode == JAL;
+	assign is_jal = opcode == JAL || opcode == JALR;
 	assign pc_jal = is_jal ? pc + 32'd4 : 'z;
 	
 	always_comb begin
 		A = 'z;
 		B = 'z;
 		op = 'z;
+		branch_condition = 'b0;
 		case (opcode)
 			OP, OP_IMM: begin
 				A = rs1data;
-				if (opcode == OP)
-					B = rs2data;
-				else
-					B = imm;
+				B = opcode == OP ? rs2data : imm;
 				case (func3)
-					3'b000: begin
-						if (opcode == OP) begin
-							if (func7[5] == 0)
-								op = ADD;
-							else
-								op = SUB;
-						end
-						else
-							op = ADD;
-					end
-					3'b001: begin
-						
-					end
-					3'b100: begin
-						op = XOR;
-					end
-					3'b110: begin
-						op = OR;
-					end
-					3'b111: begin
-						op = AND;
-					end
+					3'b000: op = opcode == OP ? ( func7 == 0 ? ADD : SUB ) : ADD;
+					3'b001: op = SLL;
+					3'b100: op = XOR;
+					3'b110: op = OR;
+					3'b111: op = AND;
+					3'b101: op = func7 == 0 ? SRL : SRA;
 					default: begin end
 				endcase
 			end
@@ -65,6 +48,22 @@ module operand_builder (
 				A = pc;
 				B = imm;
 				op = ADD;
+			end
+			JALR: begin
+				A = rs1data;
+				B = imm;
+				op = ADD;
+			end
+			BRANCH: begin
+				case (func3)
+					'h0: branch_condition = (rs1data == rs2data);							// beq
+					'h1: branch_condition = (rs1data != rs2data);							// bne
+					'h4: branch_condition = ($signed(rs1data) < $signed(rs2data));		// blt
+					'h5: branch_condition = ($signed(rs1data) >= $signed(rs2data));	// bge
+					'h6: branch_condition = (rs1data < rs2data);								// bltu
+					'h7: branch_condition = (rs1data >= rs2data);							// bgeu
+					default: branch_condition = 'b0;
+				endcase
 			end
 			default: begin
 			end
