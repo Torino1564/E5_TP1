@@ -33,11 +33,11 @@ module register_bank
 	input wire inst_write_rd
 );
 	// Tristate logic
-	logic [WSIZE-1:0] mem_data_out_reg;
+	logic [WSIZE-1:0] mem_data_out;
 	logic mem_data_out_enable;
 	logic [WSIZE-1:0] mem_data_in;
 	
-	assign mem_data_port = mem_data_out_enable ? mem_data_out_reg : 'z;
+	assign mem_data_port = mem_data_out_enable ? mem_data_out : 'z;
 	assign mem_data_in = mem_data_port;
 	
 	// register bank
@@ -55,18 +55,19 @@ module register_bank
 			registers <= '{default: '0};
 		end
 		else begin
-			if (inst_write_rd && rd != 0) begin
+			if (inst_write_rd && rd != 0)
 				registers[rd] <= rddata;
-			end
-			if (inst_write_mem) begin
-				mem_write <= 1'b1;
-				mem_data_out_enable <= 1'b1;
-				mem_data_out_reg <= registers[rs2];
-			end else begin
-				mem_data_out_enable <= 1'b0;
-			end
 		end
 	end
+	
+	always @(negedge clk) begin
+		if (inst_write_mem)
+			mem_write <= 1'b1;
+	end
+	
+	// Memory write
+	assign mem_data_out = registers[rs2];
+	assign mem_data_out_enable = inst_write_mem;
 	
 	// Memory read
 	always @(posedge mem_ready) begin

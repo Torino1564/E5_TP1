@@ -1,80 +1,63 @@
 .global _start
 
-_start:
+_start:    
+# -------------------------
+    # Base address (RAM = 0x10000000)
     # -------------------------
-    # Setup values
-    # -------------------------
-    addi x1, x0, 5          # x1 = 5
-    addi x2, x0, 5          # x2 = 5
-    addi x3, x0, 10         # x3 = 10
-    addi x4, x0, -1         # x4 = -1 (0xFFFFFFFF)
+    lui  x1, 0x10000        # x1 = 0x10000000
+    addi x1, x1, 0x100      # x1 = 0x10000100 (safe offset)
 
     # -------------------------
-    # BEQ (should branch)
+    # Test 1: simple store/load
     # -------------------------
-    beq x1, x2, beq_taken
-    addi x10, x0, 1         # FAIL if executed
+    lui  x2, 0x12345
+    addi x2, x2, 0x678      # x2 = 0x12345678
 
-beq_taken:
-    addi x10, x0, 2         # PASS
+    sw   x2, 0(x1)
+    lw   x3, 0(x1)
 
-    # -------------------------
-    # BNE (should NOT branch)
-    # -------------------------
-    bne x1, x2, bne_taken
-    addi x11, x0, 2         # PASS
-    jal x0, bne_end
-
-bne_taken:
-    addi x11, x0, 1         # FAIL
-
-bne_end:
+    bne  x2, x3, fail
 
     # -------------------------
-    # BLT (signed) → 5 < 10 (true)
+    # Test 2: overwrite
     # -------------------------
-    blt x1, x3, blt_taken
-    addi x12, x0, 1         # FAIL
+    lui  x2, 0xAAAAA
+    addi x2, x2, 0x555      # x2 = 0xAAAAA555
 
-blt_taken:
-    addi x12, x0, 2         # PASS
+    sw   x2, 4(x1)
+    lw   x4, 4(x1)
 
-    # -------------------------
-    # BGE (signed) → 10 >= 5 (true)
-    # -------------------------
-    bge x3, x1, bge_taken
-    addi x13, x0, 1         # FAIL
-
-bge_taken:
-    addi x13, x0, 2         # PASS
+    bne  x2, x4, fail
 
     # -------------------------
-    # BLTU (unsigned)
-    # x4 = 0xFFFFFFFF (large unsigned)
-    # x1 = 5
-    # → x4 < x1 is FALSE
+    # Test 3: multiple locations
     # -------------------------
-    bltu x4, x1, bltu_taken
-    addi x14, x0, 2         # PASS
-    jal x0, bltu_end
+    addi x5, x0, 1
+    addi x6, x0, 2
+    addi x7, x0, 3
 
-bltu_taken:
-    addi x14, x0, 1         # FAIL
+    sw   x5, 8(x1)
+    sw   x6, 12(x1)
+    sw   x7, 16(x1)
 
-bltu_end:
+    lw   x8, 8(x1)
+    lw   x9, 12(x1)
+    lw   x10,16(x1)
 
-    # -------------------------
-    # BGEU (unsigned)
-    # x4 >= x1 → TRUE
-    # -------------------------
-    bgeu x4, x1, bgeu_taken
-    addi x15, x0, 1         # FAIL
-
-bgeu_taken:
-    addi x15, x0, 2         # PASS
+    bne  x5, x8, fail
+    bne  x6, x9, fail
+    bne  x7, x10, fail
 
     # -------------------------
-    # Done (infinite loop)
+    # PASS
     # -------------------------
-end:
-    jal x0, end
+pass:
+    addi x20, x0, 1
+    jal  x0, pass
+
+    # -------------------------
+    # FAIL
+    # -------------------------
+fail:
+    addi x20, x0, -1
+    jal  x0, fail

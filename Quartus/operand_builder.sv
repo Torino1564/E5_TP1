@@ -17,13 +17,13 @@ module operand_builder (
 	
 	output reg [6:0] op,
 	
-	output wire [31:0] pc_jal,
+	output wire [31:0] pc_return_jal,
 	output reg branch_condition
 );
 	
 	wire is_jal;
 	assign is_jal = opcode == JAL || opcode == JALR;
-	assign pc_jal = is_jal ? pc + 32'd4 : 'z;
+	assign pc_return_jal = is_jal ? pc + 32'd4 : 'z;
 	
 	always_comb begin
 		A = 'z;
@@ -55,6 +55,9 @@ module operand_builder (
 				op = ADD;
 			end
 			BRANCH: begin
+				A = pc;
+				B = imm;
+				op = ADD;
 				case (func3)
 					'h0: branch_condition = (rs1data == rs2data);							// beq
 					'h1: branch_condition = (rs1data != rs2data);							// bne
@@ -64,6 +67,16 @@ module operand_builder (
 					'h7: branch_condition = (rs1data >= rs2data);							// bgeu
 					default: branch_condition = 'b0;
 				endcase
+			end
+			LUI: begin
+				A = imm;
+				B = 'x;
+				op = OA;
+			end
+			AUIPC: begin
+				A = pc;
+				B = imm;
+				op = ADD;
 			end
 			default: begin
 			end

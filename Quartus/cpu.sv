@@ -9,13 +9,14 @@ module cpu (
 	// =========================
 	// Instruction Decode
 	// =========================
+	reg  [31:0] next_pc = 'b0;
 	reg  [31:0] pc = 'b0;
-	reg  [31:0] prev_pc = 'b0;
 	wire [31:0] n_pc;
 	wire [31:0] q_sig;
 	wire [31:0] inst;
 	reg  [31:0] prev_inst;
 	wire [6:0] opcode;
+	reg [6:0] prev_opcode;
 	reg  [6:0] op;
 	wire [2:0] func3;
 	wire [6:0] func7;
@@ -48,12 +49,13 @@ module cpu (
 	// Control Signals
 	// =========================
 	wire inst_write_mem, inst_read_mem, inst_write_rd, inst_change_pc, inst_change_pc_request, inst_change_pc_ena, inst_write_pc_jal, inst_branch_condition;
+	reg prev_inst_change_pc;
 	reg  mem_ready;
 
 	// =========================
-	// Program Counter / Control Flow
+	// Jump instr
 	// =========================
-	wire [31:0] pc_jal;
+	wire [31:0] pc_return_jal;
 
 	// =========================
 	// Memory Interface
@@ -98,40 +100,36 @@ module cpu (
 	
 	always @(posedge clk) begin
 		if (~n_rst) begin
+			next_pc <= 32'd0;
 			pc <= 32'd0;
-			prev_pc <= 32'd0;
 			prev_inst <= NOP;
+			prev_inst_change_pc <= 'b0;
 		end
 		else 
-			pc <= n_pc;
-			prev_pc <= pc;
+			next_pc <= n_pc;
+			pc <= next_pc;
 			prev_inst <= inst;
+			prev_inst_change_pc <= inst_change_pc;
 	end
 	
-	wire [6:0] prev_opcode;
-	
-	assign inst_change_pc_ena = prev_opcode == BRANCH ? inst_branch_condition : 'b1;
+	assign inst_change_pc_ena = opcode == BRANCH ? inst_branch_condition : 'b1;
 	assign inst_change_pc = inst_change_pc_request & inst_change_pc_ena;
-	assign n_pc = ~inst_change_pc ? pc + 'd4 : alu_result;
-	assign inst_address_sig = pc[14:2];
-	assign prev_opcode = prev_inst[6:0];
-	assign inst = (inst_change_pc) ? NOP : q_sig;
-	
-	// TODO: Aca hay un loop combinacional
-	
+	assign n_pc = ~inst_change_pc ? next_pc + 'd4 : alu_result;
+	assign inst_address_sig = next_pc[14:2];
+	assign inst = (prev_inst_change_pc) ? NOP : q_sig;
 	
 	operand_builder operand_builder_inst (
 		.rs1data(rs1data),
 		.rs2data(rs2data),
 		.imm(imm),
-		.pc(prev_pc),
+		.pc(pc),
 		.func3(func3),
 		.func7(func7),
 		.opcode(opcode),
 		.A(A),
 		.B(B),
 		.op(op),
-		.pc_jal(pc_jal),
+		.pc_return_jal(pc_return_jal),
 		.branch_condition(inst_branch_condition)
 	);
 	
@@ -187,7 +185,7 @@ module cpu (
 	end
 	
 	assign reg_data_port = mem_data_drive_enable ? mem_data_drive : 'z;
-	assign rddata = inst_write_pc_jal ? pc_jal : alu_result;
+	assign rddata = inst_write_pc_jal ? pc_return_jal : alu_result;
 	
 	register_bank register_bank
 	(
@@ -244,6 +242,7 @@ module cpu (
 		.imm(imm),
 		.inst_write_rd(inst_write_rd),
 		.inst_write_pc_jal(inst_write_pc_jal),
+		.inst_write_mem(inst_write_mem),
 		.inst_change_pc(inst_change_pc_request)
 	);
 	

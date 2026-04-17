@@ -13,7 +13,8 @@ package operations;
 		EQ			,
 		SLL		,
 		SRL		,
-		SRA
+		SRA		,
+		OA
 	} OperationType;
 
 endpackage

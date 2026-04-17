@@ -14,6 +14,7 @@ module decoder
 	
 	output reg inst_write_pc_jal,
 	output reg inst_write_rd,
+	output wire inst_write_mem,
 	output reg inst_change_pc
 );
 	// Define instruction types
@@ -53,12 +54,15 @@ module decoder
 	// Inst Write RD
 	always_comb begin
 		case (inst_type)
-			R, I, J:
+			R, I, J, U:
 				inst_write_rd = 1'b1;
 			default:
 				inst_write_rd = 1'b0;
 		endcase
 	end
+	
+	// Inst Write Mem
+	assign inst_write_mem = opcode == STORE ? 1'b1 : 1'b0;
 	
 	// Inst Change PC
 	always_comb begin
@@ -80,7 +84,7 @@ module decoder
 			end
 			default: begin
 				func3 = '0;
-				rs1 = 'X;
+				rs1 = '0;
 			end
 		endcase
 	end
@@ -92,7 +96,7 @@ module decoder
 				rs2 = inst[24:20];
 			end
 			default: begin
-				rs2 = 'X;
+				rs2 = '0;
 			end
 		endcase
 	end
@@ -104,7 +108,7 @@ module decoder
 				rd = inst[11:7];
 			end
 			default: begin
-				rd = 'z;
+				rd = '0;
 			end
 		endcase
 	end
@@ -116,7 +120,7 @@ module decoder
 				func7 = inst[31:25];
 			end
 			default: begin
-				func7 = 'z;
+				func7 = '0;
 			end
 		endcase
 	end
@@ -148,7 +152,7 @@ module decoder
 				imm[19:12] = inst[19:12];
 			end
 			default: 
-				imm = 'z;
+				imm = '0;
 		endcase
 	end
 	
