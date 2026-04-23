@@ -15,7 +15,8 @@ module decoder
 	output reg inst_write_pc_jal,
 	output reg inst_write_rd,
 	output wire inst_write_mem,
-	output reg inst_change_pc
+	output reg inst_change_pc,
+	output wire inst_read_mem
 );
 	// Define instruction types
 	enum bit[2:0] {R, I, S, B, U, J, E} 	INST_TYPE;
@@ -26,7 +27,7 @@ module decoder
 	reg [2:0] inst_type;
 	always_comb begin
 		case (opcode)
-			LOAD: 		inst_type = R;	// LOAD
+			LOAD: 		inst_type = I;	// LOAD
 			OP: 			inst_type = R;	// OP
 			OP_IMM: 		inst_type = I;	// OP-IMM
 			STORE: 		inst_type = S;	// STORE
@@ -63,6 +64,9 @@ module decoder
 	
 	// Inst Write Mem
 	assign inst_write_mem = opcode == STORE ? 1'b1 : 1'b0;
+	
+	// Inst Read Mem
+	assign inst_read_mem = opcode == LOAD ? 1'b1 : 1'b0;
 	
 	// Inst Change PC
 	always_comb begin

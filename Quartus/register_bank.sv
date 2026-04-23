@@ -7,6 +7,7 @@ module register_bank
 	// Clk
 	input wire clk,
 	input wire n_rst,
+	input wire halt,
 	
 	// Read
 	input wire [ADD_BUS_WIDTH-1:0] rs1,
@@ -19,10 +20,10 @@ module register_bank
 	input wire [WSIZE-1:0] rddata,
 	
 	// Memory
-	inout logic [WSIZE-1:0] mem_data_port,
+	input logic [WSIZE-1:0] mem_read_port,
+	output logic [WSIZE-1:0] mem_write_port,
 	output reg mem_write,
-	input wire mem_ready,
-	output reg [WSIZE-1:0] mem_read_out,
+	input wire mem_clk,
 	
 	// Immediate
 	input wire [WSIZE-1:0] imm,
@@ -32,14 +33,14 @@ module register_bank
 	input wire inst_read_mem,
 	input wire inst_write_rd
 );
-	// Tristate logic
-	logic [WSIZE-1:0] mem_data_out;
-	logic mem_data_out_enable;
-	logic [WSIZE-1:0] mem_data_in;
-	
-	assign mem_data_port = mem_data_out_enable ? mem_data_out : 'z;
-	assign mem_data_in = mem_data_port;
-	
+	reg mem_ready = 'b0;
+	always_ff @(posedge mem_clk, negedge inst_read_mem) begin
+		if (~inst_read_mem)
+			mem_ready <= 1'b0;
+		else
+			mem_ready <= 1'b1;
+	end
+
 	// register bank
 	reg [WSIZE-1:0] registers [NUM_REGISTERS] = '{default: '0};
 	
@@ -50,28 +51,21 @@ module register_bank
 	end
 	
 	// Update write
-	always @(posedge clk) begin
+	always @(posedge clk, negedge n_rst) begin
 		if (~n_rst) begin
 			registers <= '{default: '0};
 		end
-		else begin
-			if (inst_write_rd && rd != 0)
+		else if (~halt) begin
+			if (inst_write_rd && rd != 0 && ~inst_read_mem)
 				registers[rd] <= rddata;
+			else if (inst_read_mem && rd != 0) begin
+				if (mem_ready)
+					registers[rd] <= mem_read_port;
+			end
 		end
 	end
 	
-	always @(negedge clk) begin
-		if (inst_write_mem)
-			mem_write <= 1'b1;
-	end
-	
 	// Memory write
-	assign mem_data_out = registers[rs2];
-	assign mem_data_out_enable = inst_write_mem;
-	
-	// Memory read
-	always @(posedge mem_ready) begin
-		if (inst_read_mem)
-			mem_read_out <= mem_data_in;
-	end
+	assign mem_write = inst_write_mem;
+	assign mem_write_port = mem_write ? registers[rs2] : 'x;
 endmodule

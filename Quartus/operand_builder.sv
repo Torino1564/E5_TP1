@@ -23,12 +23,12 @@ module operand_builder (
 	
 	wire is_jal;
 	assign is_jal = opcode == JAL || opcode == JALR;
-	assign pc_return_jal = is_jal ? pc + 32'd4 : 'z;
+	assign pc_return_jal = is_jal ? pc + 32'd4 : 'x;
 	
 	always_comb begin
-		A = 'z;
-		B = 'z;
-		op = 'z;
+		A = 'x;
+		B = 'x;
+		op = 'x;
 		branch_condition = 'b0;
 		case (opcode)
 			OP, OP_IMM: begin

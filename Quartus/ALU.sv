@@ -31,7 +31,7 @@ module ALU(
 			SRL: result = A >> u_B;
 			SRA: result = A >>> u_B;
 			OA: result = A;
-			default: result = 'z;
+			default: result = 'b0;
 		endcase
 	end
 	
