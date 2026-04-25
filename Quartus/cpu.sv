@@ -11,8 +11,8 @@ module cpu (
 	// =========================
 	// Instruction Decode
 	// =========================
-	reg  [31:0] next_pc = 'b0;
-	reg  [31:0] pc = 'b0;
+	wire  [31:0] next_pc;
+	wire  [31:0] pc;
 	wire [31:0] n_pc;
 	wire [31:0] rom_q_a_sig;
 	wire [31:0] inst;
@@ -27,8 +27,8 @@ module cpu (
 	// Register File / Operands
 	// =========================
 	wire [31:0] rs1data, rs2data;
-	reg  [31:0] A;
-	reg  [31:0] B;
+	wire  [31:0] A;
+	wire  [31:0] B;
 	wire [31:0] reg_write_port;
 	reg  [31:0] reg_read_port;
 	wire [31:0] rddata;
@@ -94,7 +94,7 @@ module cpu (
 	
 	////////////////////////////////////////////////////////////////////////////////////////////
 	
-	wire halt;
+	reg halt = 1'b0;
 	
 	// Main register updates
 	
@@ -113,18 +113,18 @@ module cpu (
 	// Fetch module
 	
 	fetch fetch_inst (
-	.clk(clk),
-	.n_rst(n_rst),
-	.halt(halt),
-	.instruction_address(instruction_address),
-	.pc(pc),
-	.next_pc(next_pc),
-	.rom_out_port(rom_q_a_sig),
-	.alu_result(alu_result),
-	.inst(inst),
-	.inst_change_pc(inst_change_pc),
-	.prev_inst_change_pc(prev_inst_change_pc)
-);
+		.clk(clk),
+		.n_rst(n_rst),
+		.halt(halt),
+		.instruction_address(instruction_address),
+		.pc(pc),
+		.next_pc(next_pc),
+		.rom_out_port(rom_q_a_sig),
+		.alu_result(alu_result),
+		.inst(inst),
+		.inst_change_pc(inst_change_pc),
+		.prev_inst_change_pc(prev_inst_change_pc)
+	);
 	
 	// Op builder
 	

@@ -11,9 +11,8 @@ module mmi_tb;
 	reg [WORD_SIZE-1:0] data_outs [NUM_DEVICES];
 	
 	
-	mmi mmi_inst #(
-		.ADDRESS_SIZE(WORD_SIZE),
-		.
-	) ()
+//	mmi mmi_inst #(
+//		.ADDRESS_SIZE(WORD_SIZE)
+//	) ();
 	
 endmodule

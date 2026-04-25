@@ -105,7 +105,6 @@ set_location_assignment PIN_J1 -to n_rst
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name SYSTEMVERILOG_FILE mmi.sv
 set_global_assignment -name HEX_FILE program.hex
 set_global_assignment -name SYSTEMVERILOG_FILE addrBuilder_tb.sv
@@ -127,3 +126,4 @@ set_global_assignment -name SYSTEMVERILOG_FILE cpu_tb.sv
 set_global_assignment -name QIP_FILE rom.qip
 set_global_assignment -name SYSTEMVERILOG_FILE fetch.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mmi_tb.sv
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

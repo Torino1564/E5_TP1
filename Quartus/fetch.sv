@@ -14,6 +14,7 @@ module fetch (
 	input wire inst_change_pc, prev_inst_change_pc
 );
 	reg [31:0] prev_inst = 'b0;
+	wire [31:0] next_next_pc;
 	
 	always_ff @(posedge clk) begin
 		if (~n_rst) begin
