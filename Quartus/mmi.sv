@@ -1,13 +1,14 @@
-module register_bank_memory_interface
+module mmi
 #(
 	parameter ADDRESS_SIZE = 32,
+	parameter DEVICE_ADDRESS_SIZE = 13,
 	parameter NUM_DEVICES = 2,
 	parameter BIT_SIZE = $clog2(NUM_DEVICES),
 	parameter logic [BIT_SIZE-1:0] BASE_ADDR [NUM_DEVICES] = '{default:'h0}
 	
 )(
 	// Device connections
-	output wire [ADDRESS_SIZE-1:0] address_connectors [NUM_DEVICES],
+	output wire [DEVICE_ADDRESS_SIZE-1:0] address_connectors [NUM_DEVICES],
 	output wire [ADDRESS_SIZE-1:0] data_out_connectors [NUM_DEVICES],
 	output wire mem_write_connectors [NUM_DEVICES],
 	input wire [ADDRESS_SIZE-1:0] data_in_connectors [NUM_DEVICES],
@@ -16,16 +17,16 @@ module register_bank_memory_interface
 	// CPU interface
 	input wire [ADDRESS_SIZE-1:0] address,
 	input wire [ADDRESS_SIZE-1:0] data_out,
-	output wire [ADDRESS_SIZE-1:0] data_in
+	output reg [ADDRESS_SIZE-1:0] data_in
 );
 	
-	logic selector [NUM_DEVICES];
+	logic [NUM_DEVICES-1:0] selector;
 	
 	// Select Device
 	genvar i;
 	generate
 		for (i = 0; i < NUM_DEVICES; i++) begin : SELECTOR
-			assign selector[i] =  address & BASE_ADDR[i][ADDRESS_SIZE-1-:BIT_SIZE] ? 1'b1 : 1'b0;
+			assign selector[i] =  (address[ADDRESS_SIZE-1 -: BIT_SIZE] == BASE_ADDR[i]);
 		end
 	endgenerate
 	
@@ -34,6 +35,7 @@ module register_bank_memory_interface
 	generate
 		for (i = 0; i < NUM_DEVICES; i++) begin : BROADCASTER
 			assign data_out_connectors[i] = selector[i] ? data_out : 'x;
+			assign address_connectors[i] = selector[i] ? address[DEVICE_ADDRESS_SIZE-1:0] : 'x;
 			assign mem_write_connectors[i] = selector[i] ? 1'b1 : 1'b0;
 		end
 	endgenerate
