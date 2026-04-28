@@ -1,7 +1,8 @@
 module fetch (
 	input wire clk,
 	input wire n_rst,
-	input wire halt,
+	input wire ena,
+	input wire flush,
 	
 	output wire [12:0] instruction_address,
 	output reg [31:0] pc,
@@ -11,7 +12,7 @@ module fetch (
 	input wire [31:0] alu_result,
 	output wire [31:0] inst,
 	
-	input wire inst_change_pc, prev_inst_change_pc
+	input wire inst_change_pc
 );
 	reg [31:0] prev_inst = 'b0;
 	wire [31:0] next_next_pc;
@@ -22,7 +23,7 @@ module fetch (
 			next_pc <= 'b0;
 			prev_inst <= 'b0;
 		end
-		else if (~halt) begin
+		else if (ena) begin
 			pc <= next_pc;
 			next_pc <= next_next_pc;
 			prev_inst <= inst;
@@ -31,6 +32,6 @@ module fetch (
 	
 	assign next_next_pc = ~inst_change_pc ? next_pc + 'd4 : alu_result;
 	assign instruction_address = next_pc[14:2];
-	assign inst = (prev_inst_change_pc) ? 'b0 : rom_out_port;
+	assign inst = (~flush) ? rom_out_port : 'b0;
 
 endmodule

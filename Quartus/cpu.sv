@@ -8,10 +8,10 @@ module cpu (
 	output [31:0] outbusA
 );
 	localparam [31:0] NOP = 32'h0;
+	localparam NUM_STAGES = 1;
+	localparam FETCH_STAGE = 0;
 	
-	// =========================
 	// Instruction Decode
-	// =========================
 	wire  [31:0] next_pc;
 	wire  [31:0] pc;
 	wire [31:0] n_pc;
@@ -24,9 +24,7 @@ module cpu (
 	wire [6:0] func7;
 	wire [4:0] rs1, rs2, rd;
 
-	// =========================
-	// Register File / Operands
-	// =========================
+	// Registers
 	wire [31:0] rs1data, rs2data;
 	wire  [31:0] A;
 	wire  [31:0] B;
@@ -34,36 +32,25 @@ module cpu (
 	reg  [31:0] reg_read_port;
 	wire [31:0] rddata;
 
-	// =========================
-	// Immediate / Addressing
-	// =========================
 	wire [31:0] imm;
 	wire [12:0] instruction_address;
 	logic [12:0] address_b_rom_sig;
 	logic [12:0] address_a_ram_sig, address_b_ram_sig;
 	wire [31:0] base_addr;
 
-	// =========================
-	// ALU / Execution
-	// =========================
+	// ALU
 	wire [31:0] alu_result;
 
-	// =========================
 	// Control Signals
-	// =========================
 	wire inst_write_mem, inst_read_mem, inst_write_rd, inst_change_pc, inst_change_pc_request, inst_change_pc_ena, inst_write_pc_jal, inst_branch_condition;
 	reg prev_inst_change_pc;
 	reg prev_inst_write_mem;
 	reg  mem_ready;
 
-	// =========================
 	// Jump instr
-	// =========================
 	wire [31:0] pc_return_jal;
 
-	// =========================
 	// RAM Interface
-	// =========================
 	reg  aclr_a_sig, aclr_b_sig;
 	reg  enable_a_sig, enable_b_sig;
 	reg  [3:0] byteena_a_sig, byteena_b_sig;
@@ -79,9 +66,7 @@ module cpu (
 
 	wire [31:0] ram_q_a_sig, ram_q_b_sig;
 
-	// =========================
 	// Secondary Memory Interface
-	// =========================
 	reg  aclr_a, aclr_b;
 	reg  clock_rom_en_sig;
 	wire rom_clk;
@@ -90,20 +75,37 @@ module cpu (
 	wire inclock_sig, outclock_sig;
 	wire [31:0] rom_q_b_sig;
 	
+	// Halt Control
+	logic [NUM_STAGES-1:0] stage_enable;
+	logic [NUM_STAGES-1:0] stage_flush;
 	////////////////////////////////////////////////////////////////////////////////////////////
 	
 	assign outbusA = rs1data;
 	
 	////////////////////////////////////////////////////////////////////////////////////////////
 	
-	reg halt = 1'b0;
+	// Halt Control
+	
+	halt_control 
+	#(
+		.NUM_STAGES(1),
+		.FETCH_STAGE(0))
+	halt_control_inst (
+		.clk(clk),
+		.n_rst(n_rst),
+		.mem_ready(mem_ready),
+		.mem_read_instr(inst_read_mem),
+		.prev_instr_change_pc(prev_inst_change_pc),
+		.stage_enable(stage_enable),
+		.stage_flush(stage_flush)
+	);
 	
 	// Branch logic
 	always @(posedge clk) begin
 		if (~n_rst) begin
 			prev_inst_change_pc <= 'b0;
 		end
-		else if (~halt)
+		else if (stage_enable[FETCH_STAGE])
 			prev_inst_change_pc <= inst_change_pc;
 	end
 	
@@ -114,7 +116,6 @@ module cpu (
 	fetch fetch_inst (
 		.clk(clk),
 		.n_rst(n_rst),
-		.halt(halt),
 		.instruction_address(instruction_address),
 		.pc(pc),
 		.next_pc(next_pc),
@@ -122,7 +123,8 @@ module cpu (
 		.alu_result(alu_result),
 		.inst(inst),
 		.inst_change_pc(inst_change_pc),
-		.prev_inst_change_pc(prev_inst_change_pc)
+		.ena(stage_enable[FETCH_STAGE]),
+		.flush(stage_flush[FETCH_STAGE])
 	);
 	
 	// Decoder
@@ -149,7 +151,7 @@ module cpu (
 	(
 		.clk(clk) ,	// input  clk
 		.n_rst(n_rst) ,	// input  n_rst
-		.halt(halt),
+		.ena(1'b1),
 		.rs1(rs1) ,	// input [(ADD_BUS_WIDTH-1):0] rs1
 		.rs2(rs2) ,	// input [(ADD_BUS_WIDTH-1):0] rs2
 		.rs1data(rs1data) ,	// output [(WSIZE-1):0] rs1data
@@ -159,7 +161,7 @@ module cpu (
 		.mem_read_port(reg_read_port),
 		.mem_write_port(reg_write_port),
 		.mem_write(mem_write) ,	// output  mem_write
-		.mem_clk(clock_a_sig) ,	// input  mem_ready
+		.mem_clk(mem_ready) ,	// input  mem_ready
 		.imm(imm) ,	// input [(WSIZE-1):0] imm
 		.inst_write_mem(inst_write_mem) ,	// input  inst_write_mem
 		.inst_read_mem(inst_read_mem) ,	// input  inst_read_mem
@@ -193,19 +195,7 @@ module cpu (
 	//////////////////////////////////////////////////////////////////
 	// Memory section
 	
-//		always_comb begin
-//		address_a_ram_sig = 'b0;
-//		address_b_rom_sig = 'b0;
-//		if (base_addr[31] == 0) begin
-//			address_a_ram_sig = base_addr[12:0];
-//			reg_read_port = ram_q_a_sig;
-//		end
-//		else begin
-//			address_b_rom_sig = base_addr[12:0];
-//			reg_read_port = rom_q_b_sig;
-//		end
-//	end
-	
+	// MMI
 	assign base_addr = rs1data + imm;
 	
 	localparam NUM_DEVICES = 2;
@@ -227,7 +217,6 @@ module cpu (
 	
 	wire mem_readys [NUM_DEVICES] = '{clock_a_sig, rom_clk};
 	
-	// MMI
 	mmi #(
 		 .WORD_SIZE(WORD_SIZE),
 		 .DEVICE_ADDRESS_SIZE(DEVICE_ADDRESS_SIZE),
@@ -244,12 +233,13 @@ module cpu (
 		 .address(base_addr),
 		 .data_out(reg_write_port),
 		 .data_in(reg_read_port),
+		 .mem_ready(mem_ready),
 		 .mem_write(mem_write)
 	);
 	
 	// RAM	
-	assign clock_a_sig = ~clk;
-	assign clock_b_sig = ~clk;
+	assign clock_a_sig = clk;
+	assign clock_b_sig = clk;
 	
 	assign rden_a_sig = 1'b1;
 	assign rden_b_sig = 1'b1;
@@ -284,14 +274,14 @@ module cpu (
 	
 	//  ROM
 	assign clock_rom_en_sig = 1;
-	assign rom_clk = ~clk;
+	assign rom_clk = clk;
 	assign rden_sig = 1;
 	assign aclr_a = 0;
 	assign aclr_b = 0;
 	
 	rom rom_inst (
-		 .aclr_a(aclr_a),
-		 .aclr_b(aclr_b),
+		.aclr_a(aclr_a),
+		.aclr_b(aclr_b),
 		.address_a(instruction_address),
 		.address_b(address_b_rom_sig),
 		.rden_a(rden_sig),

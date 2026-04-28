@@ -1,4 +1,4 @@
-module mmi
+module mmi // Memory mux interface
 #(
 	parameter WORD_SIZE = 32,
 	parameter DEVICE_ADDRESS_SIZE = 13,
@@ -18,9 +18,9 @@ module mmi
 	input wire [WORD_SIZE-1:0] address,
 	input wire [WORD_SIZE-1:0] data_out,
 	output reg [WORD_SIZE-1:0] data_in,
+	output reg mem_ready,
 	input wire mem_write
 );
-	wire [BIT_SIZE-1:0] prefix = address[WORD_SIZE-1 -: BIT_SIZE];
 	logic [NUM_DEVICES-1:0] selector;
 	
 	// Select Device
@@ -44,10 +44,11 @@ module mmi
 	// Receive from device
 	always_comb begin
 		data_in = 'b0;
-		
+		mem_ready = 'b0;
 		for (int j = 0; j < NUM_DEVICES; j++) begin
 			if (selector[j]) begin
 				data_in = data_in_connectors[j];
+				mem_ready = mem_ready_connectors[j];
 			end
 		end
 	end

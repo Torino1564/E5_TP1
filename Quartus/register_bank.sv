@@ -7,7 +7,7 @@ module register_bank
 	// Clk
 	input wire clk,
 	input wire n_rst,
-	input wire halt,
+	input wire ena,
 	
 	// Read
 	input wire [ADD_BUS_WIDTH-1:0] rs1,
@@ -40,7 +40,7 @@ module register_bank
 		else
 			mem_ready <= 1'b1;
 	end
-
+	
 	// register bank
 	reg [WSIZE-1:0] registers [NUM_REGISTERS] = '{default: '0};
 	
@@ -55,7 +55,7 @@ module register_bank
 		if (~n_rst) begin
 			registers <= '{default: '0};
 		end
-		else if (~halt) begin
+		else if (ena) begin
 			if (inst_write_rd && rd != 0 && ~inst_read_mem)
 				registers[rd] <= rddata;
 			else if (inst_read_mem && rd != 0) begin
