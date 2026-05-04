@@ -1,31 +1,41 @@
 module halt_control
 #(
 	parameter NUM_STAGES = 1,
-	parameter FETCH_STAGE = 0
+	parameter FETCH_STAGE = 0,
+	parameter T
 )(
 	input wire clk,
 	input wire n_rst,
 	
-	input wire mem_ready,
-	input wire mem_read_instr,
-	input wire prev_instr_change_pc,
+	input T pipeline,
 	
 	output reg [NUM_STAGES-1:0] stage_enable,
 	output reg [NUM_STAGES-1:0] stage_flush
 );
-	int i;
-	// Fetch Stage
-	always_ff @(posedge clk, negedge n_rst) begin
+	reg [2:0] clocks_since_control_hazard = 'b0;
+	always_ff (posedge clk) begin
 		if (~n_rst)
-			stage_enable[FETCH_STAGE] <= 1'b0;
+			clocks_since_control_hazard <= 'b0;
 		else begin
-			stage_enable[FETCH_STAGE] <= 1'b1;
-			stage_flush[FETCH_STAGE] <= 1'b0;
+			clocks_since_control_hazard <= clocks_since_control_hazard + 'b1;
+		end
+	end
+	
+	int i;
+	
+	
+	// Fetch Stage
+	always_comb begin
+		if (~n_rst)
+			stage_enable[FETCH_STAGE] = 1'b0;
+		else begin
+			stage_enable[FETCH_STAGE] = 1'b1;
+			stage_flush[FETCH_STAGE] = 1'b0;
 			if (mem_read_instr && !mem_ready) begin
-				stage_enable[FETCH_STAGE] <= 1'b0;
+				stage_enable[FETCH_STAGE] = 1'b0;
 			end
 			else if (prev_instr_change_pc) begin
-				stage_flush[FETCH_STAGE] <= 1'b1;
+				stage_flush[FETCH_STAGE] = 1'b1;
 			end
 		end
 	end

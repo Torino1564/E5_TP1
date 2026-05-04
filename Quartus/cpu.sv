@@ -8,8 +8,16 @@ module cpu (
 	output [31:0] outbusA
 );
 	localparam [31:0] NOP = 32'h0;
-	localparam NUM_STAGES = 1;
-	localparam FETCH_STAGE = 0;
+	localparam NUM_STAGES = 6;
+
+	typedef enum logic [2:0] {
+		FETCH_STAGE,
+		DECODE_STAGE,
+		REGISTER_STAGE,
+		EXECUTION_STAGE,
+		MEMORY_READ_STAGE,
+		WRITEBACK_STAGE
+	} Stages;
 	
 	// Instruction Decode
 	wire  [31:0] next_pc;
@@ -78,6 +86,29 @@ module cpu (
 	// Halt Control
 	logic [NUM_STAGES-1:0] stage_enable;
 	logic [NUM_STAGES-1:0] stage_flush;
+	
+	// Latches
+	typedef struct packed {
+		logic [31:0] pc;
+		logic [31:0] inst;
+		logic [31:0] rs1data;
+		logic [31:0] rs2data;
+		logic [31:0] imm;
+		logic [4:0] rs1;
+		logic [4:0] rs2;
+		logic [4:0] rd;
+		
+		// flags
+		logic inst_write_rd;
+		logic inst_write_pc_jal;
+		logic inst_write_mem;
+		logic inst_read_mem;
+		logic inst_change_pc_request;
+		logic branch_condition;
+	} stage_t;
+	
+	stage_t pipeline[NUM_STAGES];
+	
 	////////////////////////////////////////////////////////////////////////////////////////////
 	
 	assign outbusA = rs1data;
@@ -88,14 +119,14 @@ module cpu (
 	
 	halt_control 
 	#(
-		.NUM_STAGES(1),
+		.NUM_STAGES(NUM_STAGES),
+		.T(stage_t),
 		.FETCH_STAGE(0))
 	halt_control_inst (
 		.clk(clk),
-		.n_rst(n_rst),
-		.mem_ready(mem_ready),
-		.mem_read_instr(inst_read_mem),
-		.prev_instr_change_pc(prev_inst_change_pc),
+		.n_rst(n_rst)
+		.pipeline(pipeline),
+		.inst_change_pc(inst_change_pc),
 		.stage_enable(stage_enable),
 		.stage_flush(stage_flush)
 	);
@@ -118,54 +149,68 @@ module cpu (
 		.n_rst(n_rst),
 		.instruction_address(instruction_address),
 		.pc(pc),
-		.next_pc(next_pc),
 		.rom_out_port(rom_q_a_sig),
 		.alu_result(alu_result),
-		.inst(inst),
+		.inst(pipeline[FETCH_STAGE].inst),
 		.inst_change_pc(inst_change_pc),
 		.ena(stage_enable[FETCH_STAGE]),
 		.flush(stage_flush[FETCH_STAGE])
 	);
 	
+	stage_t out_fetch_stage;
+	
+	ff #(.T(stage_t)) fetch_stage (
+		.d(pipeline[FETCH_STAGE]),
+		.q(out_fetch_stage)
+	);
+	
+	
 	// Decoder
 	decoder decoder_inst (
-		.inst(inst),
-		.rs1(rs1),
-		.rs2(rs2),
-		.rd(rd),
-		.opcode(opcode),
-		.func3(func3),
-		.func7(func7),
-		.imm(imm),
-		.inst_write_rd(inst_write_rd),
-		.inst_write_pc_jal(inst_write_pc_jal),
-		.inst_write_mem(inst_write_mem),
-		.inst_change_pc(inst_change_pc_request),
-		.inst_read_mem(inst_read_mem)
+		.inst(out_fetch_stage.inst),
+		.rs1(pipeline[DECODE_STAGE].rs1),
+		.rs2(pipeline[DECODE_STAGE].rs2),
+		.rd(pipeline[DECODE_STAGE].rd),
+		.opcode(pipeline[DECODE_STAGE].opcode),
+		.func3(pipeline[DECODE_STAGE].func3),
+		.func7(pipeline[DECODE_STAGE].func7),
+		.imm(pipeline[DECODE_STAGE].imm),
+		.inst_write_rd(pipeline[DECODE_STAGE].inst_write_rd),
+		.inst_write_pc_jal(pipeline[DECODE_STAGE].inst_write_pc_jal),
+		.inst_write_mem(pipeline[DECODE_STAGE].inst_write_mem),
+		.inst_change_pc(pipeline[DECODE_STAGE].inst_change_pc_request),
+		.inst_read_mem(pipeline[DECODE_STAGE].inst_read_mem)
+	);
+	
+	stage_t out_decode_stage;
+	
+	ff #(.T(stage_t)) fetch_stage (
+		.d(pipeline[DECODE_STAGE]),
+		.q(out_decode_stage)
 	);
 	
 	// Register bank
-	assign rddata = inst_write_pc_jal ? pc_return_jal : alu_result;
+	assign rddata = pipeline[EXECUTION_STAGE].inst_write_pc_jal ? pc_return_jal : alu_result;
 	
 	register_bank register_bank
 	(
 		.clk(clk) ,	// input  clk
 		.n_rst(n_rst) ,	// input  n_rst
 		.ena(1'b1),
-		.rs1(rs1) ,	// input [(ADD_BUS_WIDTH-1):0] rs1
-		.rs2(rs2) ,	// input [(ADD_BUS_WIDTH-1):0] rs2
-		.rs1data(rs1data) ,	// output [(WSIZE-1):0] rs1data
-		.rs2data(rs2data) ,	// output [(WSIZE-1):0] rs2data
+		.rs1(out_decode_stage.rs1) ,	// input [(ADD_BUS_WIDTH-1):0] rs1
+		.rs2(out_decode_stage.rs2) ,	// input [(ADD_BUS_WIDTH-1):0] rs2
+		.rs1data(pipeline[REGISTER_STAGE].rs1data) ,	// output [(WSIZE-1):0] rs1data
+		.rs2data(pipeline[REGISTER_STAGE].rs2data) ,	// output [(WSIZE-1):0] rs2data
 		.rd(rd) ,	// input [(ADD_BUS_WIDTH-1):0] rd
 		.rddata(rddata) ,	// input [(WSIZE-1):0] rddata
 		.mem_read_port(reg_read_port),
 		.mem_write_port(reg_write_port),
 		.mem_write(mem_write) ,	// output  mem_write
 		.mem_clk(mem_ready) ,	// input  mem_ready
-		.imm(imm) ,	// input [(WSIZE-1):0] imm
-		.inst_write_mem(inst_write_mem) ,	// input  inst_write_mem
-		.inst_read_mem(inst_read_mem) ,	// input  inst_read_mem
-		.inst_write_rd(inst_write_rd) 	// input  inst_write_rd
+		.imm(out_decode_stage.imm) ,	// input [(WSIZE-1):0] imm
+		.inst_write_mem(out_decode_stage.inst_write_mem) ,	// input  inst_write_mem
+		.inst_read_mem(pipeline[MEMORY_READ_STAGE].inst_read_mem) ,	// input  inst_read_mem
+		.inst_write_rd(pipeline[WRITEBACK_STAGE].inst_write_rd) 	// input  inst_write_rd
 	);
 	
 	// Op builder
@@ -196,7 +241,7 @@ module cpu (
 	// Memory section
 	
 	// MMI
-	assign base_addr = rs1data + imm;
+	assign base_addr = pipeline[REGISTER_STAGE].rs1data + pipeline[REGISTER_STAGE].imm;
 	
 	localparam NUM_DEVICES = 2;
 	localparam BaseAddresses DEVICE_MAP [NUM_DEVICES] = '{RAM, ROM};
