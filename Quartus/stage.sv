@@ -11,6 +11,9 @@ package stage;
 		logic [4:0] rs1;
 		logic [4:0] rs2;
 		logic [4:0] rd;
+		logic [2:0] func3;
+		logic [6:0] func7;
+		logic [6:0] opcode;
 		
 		// flags
 		logic inst_write_rd;

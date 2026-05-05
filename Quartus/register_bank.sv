@@ -21,7 +21,7 @@ module register_bank
 	
 	// Memory
 	input logic [WSIZE-1:0] mem_read_port,
-	output logic [WSIZE-1:0] mem_write_port,
+	input wire [ADD_BUS_WIDTH-1:0] mem_rd,
 	input wire mem_ready,
 	
 	// Immediate
@@ -55,18 +55,4 @@ module register_bank
 			end
 		end
 	end
-	
-	reg [31:0] mem_write_previous = 'b0;
-	
-	always_ff @(posedge clk, negedge n_rst) begin
-		if (~n_rst) begin
-			mem_write_previous <= 'b0;
-		end
-		else if (ena) begin
-			mem_write_previous <= registers[rs2];
-		end
-	end
-	
-	// Memory write
-	assign mem_write_port = inst_write_mem ? mem_write_previous : 'x;
 endmodule

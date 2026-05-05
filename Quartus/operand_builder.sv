@@ -78,6 +78,11 @@ module operand_builder (
 				B = imm;
 				op = ADD;
 			end
+			LOAD, STORE: begin
+				A = rs1data;
+				B = imm;
+				op = ADD;
+			end
 			default: begin
 			end
 		endcase
