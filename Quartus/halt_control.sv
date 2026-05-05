@@ -10,13 +10,14 @@ module halt_control(
 	input wire mem_ready,
 	
 	output logic forward_A,
+	output logic [2:0] forward_A_from,
 	output logic forward_B,
-	output logic forward_SAW,
+	output logic [2:0] forward_B_from,
 	
 	output reg [NUM_STAGES-1:0] stage_enable,
 	output reg [NUM_STAGES-1:0] stage_flush
 );
-	
+	int i;
 	always_comb begin
 		if (~n_rst) begin
 			forward_A = 'b0;
@@ -25,16 +26,28 @@ module halt_control(
 		else begin
 			forward_A = 'b0;
 			forward_B = 'b0;
-			if (pipeline[MEMORY_STAGE].rd != 'b0) begin
-				if (pipeline[EXECUTION_STAGE].rs1 == pipeline[MEMORY_STAGE].rd)
+			forward_A_from = 'b0;
+			forward_B_from = 'b0;
+			
+			if (pipeline[EXECUTION_STAGE].rs1 != 'b0) begin
+				if (pipeline[EXECUTION_STAGE].rs1 == pipeline[MEMORY_STAGE].rd) begin
 					forward_A = 1'b1;
-				else if (pipeline[EXECUTION_STAGE].rs2 == pipeline[MEMORY_STAGE].rd)
-					forward_B = 1'b1;
+					forward_A_from = MEMORY_STAGE;
+				end else if (pipeline[EXECUTION_STAGE].rs1 == pipeline[WRITEBACK_STAGE].rd) begin
+					forward_A = 1'b1;
+					forward_A_from = WRITEBACK_STAGE;
+				end
 			end
-			if (pipeline[MEMORY_STAGE].opcode == STORE && (pipeline[WRITEBACK_STAGE].rd == pipeline[MEMORY_STAGE].rs2))
-				forward_SAW = 1'b1;
-			else
-				forward_SAW = 1'b0;
+			
+			if (pipeline[EXECUTION_STAGE].rs2 != 'b0) begin
+				if (pipeline[EXECUTION_STAGE].rs2 == pipeline[MEMORY_STAGE].rd) begin
+					forward_B = 1'b1;
+					forward_B_from = MEMORY_STAGE;
+				end else if (pipeline[EXECUTION_STAGE].rs2 == pipeline[WRITEBACK_STAGE].rd) begin
+					forward_B = 1'b1;
+					forward_B_from = WRITEBACK_STAGE;
+				end
+			end
 		end
 	end
 	

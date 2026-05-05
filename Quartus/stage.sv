@@ -26,8 +26,6 @@ package stage;
 	} stage_t;
 	
 	localparam STAGE_SIZE = $bits(stage_t);
-	
-		localparam NUM_STAGES = 6;
 
 	typedef enum logic [2:0] {
 		FETCH_STAGE,
@@ -35,7 +33,10 @@ package stage;
 		REGISTER_STAGE,
 		EXECUTION_STAGE,
 		MEMORY_STAGE,
-		WRITEBACK_STAGE
+		WRITEBACK_STAGE,
+		NUM_STAGES
 	} Stages;
-
+	
+	localparam STAGE_BIT_SIZE = $clog2(NUM_STAGES);
+	
 endpackage

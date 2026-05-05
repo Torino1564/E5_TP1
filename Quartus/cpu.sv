@@ -44,7 +44,8 @@ module cpu (
 	wire inst_write_mem, inst_read_mem, inst_write_rd, inst_change_pc, inst_change_pc_request, inst_change_pc_ena, inst_write_pc_jal, inst_branch_condition;
 	reg prev_inst_change_pc;
 	reg prev_inst_write_mem;
-	logic forward_A, forward_B, forward_SAW;
+	logic forward_A, forward_B;
+	logic [2:0] forward_B_from, forward_A_from;
 	reg  mem_ready;
 
 	// Jump instr
@@ -95,8 +96,9 @@ module cpu (
 		.n_rst(n_rst),
 		.pipeline(pipeline),
 		.forward_A(forward_A),
+		.forward_A_from(forward_A_from),
+		.forward_B_from(forward_B_from),
 		.forward_B(forward_B),
-		.forward_SAW(forward_SAW),
 		.stage_enable(stage_enable),
 		.current_decode(decode_ff_d),
 		.stage_flush(stage_flush)
@@ -259,16 +261,17 @@ module cpu (
 		execution_ff_d = 'x;
 		execution_ff_d.inst = pipeline[EXECUTION_STAGE].inst;
 		execution_ff_d.rd = pipeline[EXECUTION_STAGE].rd;
+		execution_ff_d.rs1 = pipeline[EXECUTION_STAGE].rs1;
 		execution_ff_d.rs2 = pipeline[EXECUTION_STAGE].rs2;
 		execution_ff_d.opcode = pipeline[EXECUTION_STAGE].opcode;
 		execution_ff_d.rddata = rddata;
 		execution_ff_d.imm = pipeline[EXECUTION_STAGE].imm;
-		execution_ff_d.rs1data = pipeline[EXECUTION_STAGE].rs1data;
-		execution_ff_d.rs2data = pipeline[EXECUTION_STAGE].rs2data;
 		execution_ff_d.inst_write_rd = pipeline[EXECUTION_STAGE].inst_write_rd;
 		execution_ff_d.inst_write_pc_jal = pipeline[EXECUTION_STAGE].inst_write_pc_jal;
 		execution_ff_d.inst_write_mem = pipeline[EXECUTION_STAGE].inst_write_mem;
 		execution_ff_d.inst_read_mem = pipeline[EXECUTION_STAGE].inst_read_mem;
+		execution_ff_d.rs1data = !forward_A ? pipeline[EXECUTION_STAGE].rs1data : pipeline[forward_A_from].rddata;
+		execution_ff_d.rs2data = !forward_B ? pipeline[EXECUTION_STAGE].rs2data : pipeline[forward_B_from].rddata;
 	end
 	
 	ff #(.SIZE(STAGE_SIZE)) execution_stage (
@@ -283,7 +286,8 @@ module cpu (
 	
 	
 	// MMI
-	assign base_addr = pipeline[MEMORY_STAGE].inst_read_mem || pipeline[MEMORY_STAGE].inst_write_mem ? alu_result : 'x;
+	assign base_addr = 	(pipeline[MEMORY_STAGE].inst_read_mem || pipeline[MEMORY_STAGE].inst_write_mem) ? 
+								alu_result  : 'x;
 	
 	localparam NUM_DEVICES = 2;
 	localparam BaseAddresses DEVICE_MAP [NUM_DEVICES] = '{RAM, ROM};
@@ -304,7 +308,7 @@ module cpu (
 	
 	wire mem_readys [NUM_DEVICES] = '{clock_a_sig, rom_clk};
 	
-	assign reg_write_port = forward_SAW ? pipeline[WRITEBACK_STAGE].rddata : pipeline[MEMORY_STAGE].rs2data; 
+	assign reg_write_port = pipeline[MEMORY_STAGE].rs2data; 
 	
 	mmi #(
 		 .WORD_SIZE(WORD_SIZE),
