@@ -1,12 +1,12 @@
 module ff #(
-	parameter type T = logic [31:0]
+	parameter SIZE = 31
 )(
 	input 	logic clk,
 	input 	logic ena,
 	input 	logic n_rst,
 	
-	input 	T d,
-	output 	T q
+	input 	logic [SIZE-1:0] d,
+	output 	logic [SIZE-1:0] q
 );
 
 	always_ff @(posedge clk, negedge n_rst) begin

@@ -17,13 +17,13 @@ module operand_builder (
 	
 	output reg [6:0] op,
 	
-	output wire [31:0] pc_return_jal,
+	output wire [31:0] jal_return_address,
 	output reg branch_condition
 );
 	
 	wire is_jal;
 	assign is_jal = opcode == JAL || opcode == JALR;
-	assign pc_return_jal = is_jal ? pc + 32'd4 : 'x;
+	assign jal_return_address = is_jal ? pc + 32'd4 : 'x;
 	
 	always_comb begin
 		A = 'x;

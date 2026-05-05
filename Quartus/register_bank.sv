@@ -22,8 +22,7 @@ module register_bank
 	// Memory
 	input logic [WSIZE-1:0] mem_read_port,
 	output logic [WSIZE-1:0] mem_write_port,
-	output reg mem_write,
-	input wire mem_clk,
+	input wire mem_ready,
 	
 	// Immediate
 	input wire [WSIZE-1:0] imm,
@@ -33,14 +32,6 @@ module register_bank
 	input wire inst_read_mem,
 	input wire inst_write_rd
 );
-	reg mem_ready = 'b0;
-	always_ff @(posedge mem_clk, negedge inst_read_mem) begin
-		if (~inst_read_mem)
-			mem_ready <= 1'b0;
-		else
-			mem_ready <= 1'b1;
-	end
-	
 	// register bank
 	reg [WSIZE-1:0] registers [NUM_REGISTERS] = '{default: '0};
 	
@@ -65,7 +56,17 @@ module register_bank
 		end
 	end
 	
+	reg [31:0] mem_write_previous = 'b0;
+	
+	always_ff @(posedge clk, negedge n_rst) begin
+		if (~n_rst) begin
+			mem_write_previous <= 'b0;
+		end
+		else if (ena) begin
+			mem_write_previous <= registers[rs2];
+		end
+	end
+	
 	// Memory write
-	assign mem_write = inst_write_mem;
-	assign mem_write_port = mem_write ? registers[rs2] : 'x;
+	assign mem_write_port = inst_write_mem ? mem_write_previous : 'x;
 endmodule

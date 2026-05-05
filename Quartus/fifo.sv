@@ -1,10 +1,10 @@
 module fifo
 #(
 	parameter NUM_STAGES,
-	parameter type T = logic [31:0]
+	parameter SIZE = 32
 )(
-	input T new_value,
-	output T values [NUM_STAGES],
+	input logic [SIZE-1:0] new_value,
+	output logic [SIZE-1:0] values [NUM_STAGES],
 	
 	input wire clk,
 	input wire ena,
