@@ -28,7 +28,6 @@ module register_bank
 	input wire [WSIZE-1:0] imm,
 	
 	// Instruction flags
-	input wire inst_write_mem,
 	input wire inst_read_mem,
 	input wire inst_write_rd
 );
@@ -39,10 +38,18 @@ module register_bank
 	always_comb begin
 		rs1data = registers[rs1];
 		rs2data = registers[rs2];
+	
+		if (inst_write_rd && (rd != 0)) begin
+			if (rs1 == rd)
+				rs1data = rddata;
+
+			if (rs2 == rd)
+				rs2data = rddata;
+		end
 	end
 	
 	// Update write
-	always @(posedge clk, negedge n_rst) begin
+	always_ff @(posedge clk, negedge n_rst) begin
 		if (~n_rst) begin
 			registers <= '{default: '0};
 		end

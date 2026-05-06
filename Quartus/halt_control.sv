@@ -22,6 +22,8 @@ module halt_control(
 		if (~n_rst) begin
 			forward_A = 'b0;
 			forward_B = 'b0;
+			forward_A_from = 'b0;
+			forward_B_from = 'b0;
 		end
 		else begin
 			forward_A = 'b0;

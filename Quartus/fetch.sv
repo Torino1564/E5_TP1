@@ -4,7 +4,7 @@ module fetch (
 	input wire ena,
 	input wire flush,
 	
-	output wire [12:0] instruction_address,
+	output wire [11:0] instruction_address,
 	output reg [31:0] pc,
 	
 	input wire [31:0] rom_out_port,

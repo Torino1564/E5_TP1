@@ -28,13 +28,13 @@ module cpu (
 	wire  [31:0] A;
 	wire  [31:0] B;
 	wire [31:0] reg_write_port;
-	reg  [31:0] reg_read_port;
+	logic  [31:0] reg_read_port;
 	wire [31:0] rddata;
 
 	wire [31:0] imm;
-	wire [12:0] instruction_address;
-	logic [12:0] address_b_rom_sig;
-	logic [12:0] address_a_ram_sig, address_b_ram_sig;
+	wire [11:0] instruction_address;
+	logic [11:0] address_b_rom_sig;
+	logic [11:0] address_a_ram_sig, address_b_ram_sig;
 	wire [31:0] base_addr;
 
 	// ALU
@@ -194,7 +194,6 @@ module cpu (
 		.mem_rd(pipeline[MEMORY_STAGE].rd),
 		.mem_ready(mem_ready),	// input  mem_ready
 		.imm(pipeline[REGISTER_STAGE].imm) ,	// input [(WSIZE-1):0] imm
-		.inst_write_mem(pipeline[MEMORY_STAGE].inst_write_mem) ,	// input  inst_write_mem
 		.inst_read_mem(pipeline[MEMORY_STAGE].inst_read_mem) ,	// input  inst_read_mem
 		.inst_write_rd(pipeline[WRITEBACK_STAGE].inst_write_rd) 	// input  inst_write_rd
 	);
@@ -229,8 +228,8 @@ module cpu (
 	
 	// Op builder
 	operand_builder operand_builder_inst (
-		.rs1data(pipeline[EXECUTION_STAGE].rs1data),
-		.rs2data(pipeline[EXECUTION_STAGE].rs2data),
+		.rs1data(execution_ff_d.rs1data),
+		.rs2data(execution_ff_d.rs2data),
 		.imm(pipeline[EXECUTION_STAGE].imm),
 		.pc(pipeline[EXECUTION_STAGE].pc),
 		.func3(pipeline[EXECUTION_STAGE].func3),
@@ -243,15 +242,11 @@ module cpu (
 		.branch_condition(inst_branch_condition)
 	);
 	
-	wire [31:0] alu_in_A, alu_in_B;
-	assign alu_in_A = forward_A ? pipeline[MEMORY_STAGE].rddata : A;
-	assign alu_in_B = forward_B ? pipeline[MEMORY_STAGE].rddata : B;
-	
 	// ALU
 	ALU alu_inst (
 		.op(op),
-		.A(alu_in_A),
-		.B(alu_in_B),
+		.A(A),
+		.B(B),
 		.result(alu_result)
 	);
 	
@@ -287,7 +282,7 @@ module cpu (
 	
 	// MMI
 	assign base_addr = 	(pipeline[MEMORY_STAGE].inst_read_mem || pipeline[MEMORY_STAGE].inst_write_mem) ? 
-								alu_result  : 'x;
+								pipeline[MEMORY_STAGE].rddata  : 'x;
 	
 	localparam NUM_DEVICES = 2;
 	localparam BaseAddresses DEVICE_MAP [NUM_DEVICES] = '{RAM, ROM};
@@ -308,7 +303,7 @@ module cpu (
 	
 	wire mem_readys [NUM_DEVICES] = '{clock_a_sig, rom_clk};
 	
-	assign reg_write_port = pipeline[MEMORY_STAGE].rs2data; 
+	assign reg_write_port = pipeline[MEMORY_STAGE].rs2data;
 	
 	mmi #(
 		 .WORD_SIZE(WORD_SIZE),

@@ -2,7 +2,7 @@
 
 module cpu_tb;
 
-	reg clk = 0;
+	reg clk = 1;
 	reg n_rst;
 	
 	always begin

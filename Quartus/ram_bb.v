@@ -54,8 +54,8 @@ module ram (
 
 	input	  aclr_a;
 	input	  aclr_b;
-	input	[12:0]  address_a;
-	input	[12:0]  address_b;
+	input	[11:0]  address_a;
+	input	[11:0]  address_b;
 	input	[3:0]  byteena_a;
 	input	[3:0]  byteena_b;
 	input	  clock_a;
@@ -123,18 +123,18 @@ endmodule
 // Retrieval info: PRIVATE: JTAG_ENABLED NUMERIC "0"
 // Retrieval info: PRIVATE: JTAG_ID STRING "NONE"
 // Retrieval info: PRIVATE: MAXIMUM_DEPTH NUMERIC "0"
-// Retrieval info: PRIVATE: MEMSIZE NUMERIC "262144"
+// Retrieval info: PRIVATE: MEMSIZE NUMERIC "131072"
 // Retrieval info: PRIVATE: MEM_IN_BITS NUMERIC "0"
 // Retrieval info: PRIVATE: MIFfilename STRING ""
 // Retrieval info: PRIVATE: OPERATION_MODE NUMERIC "3"
 // Retrieval info: PRIVATE: OUTDATA_ACLR_B NUMERIC "1"
-// Retrieval info: PRIVATE: OUTDATA_REG_B NUMERIC "1"
+// Retrieval info: PRIVATE: OUTDATA_REG_B NUMERIC "0"
 // Retrieval info: PRIVATE: RAM_BLOCK_TYPE NUMERIC "0"
 // Retrieval info: PRIVATE: READ_DURING_WRITE_MODE_MIXED_PORTS NUMERIC "2"
 // Retrieval info: PRIVATE: READ_DURING_WRITE_MODE_PORT_A NUMERIC "3"
 // Retrieval info: PRIVATE: READ_DURING_WRITE_MODE_PORT_B NUMERIC "3"
 // Retrieval info: PRIVATE: REGdata NUMERIC "1"
-// Retrieval info: PRIVATE: REGq NUMERIC "1"
+// Retrieval info: PRIVATE: REGq NUMERIC "0"
 // Retrieval info: PRIVATE: REGrdaddress NUMERIC "0"
 // Retrieval info: PRIVATE: REGrren NUMERIC "1"
 // Retrieval info: PRIVATE: REGwraddress NUMERIC "1"
@@ -158,23 +158,23 @@ endmodule
 // Retrieval info: CONSTANT: BYTE_SIZE NUMERIC "8"
 // Retrieval info: CONSTANT: CLOCK_ENABLE_INPUT_A STRING "NORMAL"
 // Retrieval info: CONSTANT: CLOCK_ENABLE_INPUT_B STRING "NORMAL"
-// Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_A STRING "NORMAL"
-// Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_B STRING "NORMAL"
+// Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_A STRING "BYPASS"
+// Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_B STRING "BYPASS"
 // Retrieval info: CONSTANT: INDATA_REG_B STRING "CLOCK1"
 // Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Cyclone V"
 // Retrieval info: CONSTANT: LPM_TYPE STRING "altsyncram"
-// Retrieval info: CONSTANT: NUMWORDS_A NUMERIC "8192"
-// Retrieval info: CONSTANT: NUMWORDS_B NUMERIC "8192"
+// Retrieval info: CONSTANT: NUMWORDS_A NUMERIC "4096"
+// Retrieval info: CONSTANT: NUMWORDS_B NUMERIC "4096"
 // Retrieval info: CONSTANT: OPERATION_MODE STRING "BIDIR_DUAL_PORT"
 // Retrieval info: CONSTANT: OUTDATA_ACLR_A STRING "CLEAR0"
 // Retrieval info: CONSTANT: OUTDATA_ACLR_B STRING "CLEAR1"
-// Retrieval info: CONSTANT: OUTDATA_REG_A STRING "CLOCK0"
-// Retrieval info: CONSTANT: OUTDATA_REG_B STRING "CLOCK1"
+// Retrieval info: CONSTANT: OUTDATA_REG_A STRING "UNREGISTERED"
+// Retrieval info: CONSTANT: OUTDATA_REG_B STRING "UNREGISTERED"
 // Retrieval info: CONSTANT: POWER_UP_UNINITIALIZED STRING "FALSE"
 // Retrieval info: CONSTANT: READ_DURING_WRITE_MODE_PORT_A STRING "NEW_DATA_NO_NBE_READ"
 // Retrieval info: CONSTANT: READ_DURING_WRITE_MODE_PORT_B STRING "NEW_DATA_NO_NBE_READ"
-// Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "13"
-// Retrieval info: CONSTANT: WIDTHAD_B NUMERIC "13"
+// Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "12"
+// Retrieval info: CONSTANT: WIDTHAD_B NUMERIC "12"
 // Retrieval info: CONSTANT: WIDTH_A NUMERIC "32"
 // Retrieval info: CONSTANT: WIDTH_B NUMERIC "32"
 // Retrieval info: CONSTANT: WIDTH_BYTEENA_A NUMERIC "4"
@@ -182,8 +182,8 @@ endmodule
 // Retrieval info: CONSTANT: WRCONTROL_WRADDRESS_REG_B STRING "CLOCK1"
 // Retrieval info: USED_PORT: aclr_a 0 0 0 0 INPUT GND "aclr_a"
 // Retrieval info: USED_PORT: aclr_b 0 0 0 0 INPUT GND "aclr_b"
-// Retrieval info: USED_PORT: address_a 0 0 13 0 INPUT NODEFVAL "address_a[12..0]"
-// Retrieval info: USED_PORT: address_b 0 0 13 0 INPUT NODEFVAL "address_b[12..0]"
+// Retrieval info: USED_PORT: address_a 0 0 12 0 INPUT NODEFVAL "address_a[11..0]"
+// Retrieval info: USED_PORT: address_b 0 0 12 0 INPUT NODEFVAL "address_b[11..0]"
 // Retrieval info: USED_PORT: byteena_a 0 0 4 0 INPUT VCC "byteena_a[3..0]"
 // Retrieval info: USED_PORT: byteena_b 0 0 4 0 INPUT VCC "byteena_b[3..0]"
 // Retrieval info: USED_PORT: clock_a 0 0 0 0 INPUT VCC "clock_a"
@@ -200,8 +200,8 @@ endmodule
 // Retrieval info: USED_PORT: wren_b 0 0 0 0 INPUT GND "wren_b"
 // Retrieval info: CONNECT: @aclr0 0 0 0 0 aclr_a 0 0 0 0
 // Retrieval info: CONNECT: @aclr1 0 0 0 0 aclr_b 0 0 0 0
-// Retrieval info: CONNECT: @address_a 0 0 13 0 address_a 0 0 13 0
-// Retrieval info: CONNECT: @address_b 0 0 13 0 address_b 0 0 13 0
+// Retrieval info: CONNECT: @address_a 0 0 12 0 address_a 0 0 12 0
+// Retrieval info: CONNECT: @address_b 0 0 12 0 address_b 0 0 12 0
 // Retrieval info: CONNECT: @byteena_a 0 0 4 0 byteena_a 0 0 4 0
 // Retrieval info: CONNECT: @byteena_b 0 0 4 0 byteena_b 0 0 4 0
 // Retrieval info: CONNECT: @clock0 0 0 0 0 clock_a 0 0 0 0
