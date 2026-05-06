@@ -100,6 +100,7 @@ module cpu (
 		.forward_B_from(forward_B_from),
 		.forward_B(forward_B),
 		.stage_enable(stage_enable),
+		.decode_change_pc_request(inst_change_pc_request),
 		.current_decode(decode_ff_d),
 		.stage_flush(stage_flush)
 	);
@@ -179,22 +180,20 @@ module cpu (
 		.q(pipeline[REGISTER_STAGE])
 	);
 	
+	assign rddata = pipeline[EXECUTION_STAGE].inst_write_pc_jal ? jal_return_address : alu_result;
+	
 	register_bank register_bank
 	(
 		.clk(clk) ,	// input  clk
 		.n_rst(n_rst) ,	// input  n_rst
-		.ena(1'b1),
+		.ena(stage_enable[REGISTER_STAGE]),
 		.rs1(pipeline[REGISTER_STAGE].rs1) ,	// input [(ADD_BUS_WIDTH-1):0] rs1
 		.rs2(pipeline[REGISTER_STAGE].rs2) ,	// input [(ADD_BUS_WIDTH-1):0] rs2
 		.rs1data(rs1data) ,	// output [(WSIZE-1):0] rs1data
 		.rs2data(rs2data) ,	// output [(WSIZE-1):0] rs2data
 		.rd(pipeline[WRITEBACK_STAGE].rd) ,	// input [(ADD_BUS_WIDTH-1):0] rd
 		.rddata(pipeline[WRITEBACK_STAGE].rddata) ,	// input [(WSIZE-1):0] rddata
-		.mem_read_port(reg_read_port),
-		.mem_rd(pipeline[MEMORY_STAGE].rd),
-		.mem_ready(mem_ready),	// input  mem_ready
 		.imm(pipeline[REGISTER_STAGE].imm) ,	// input [(WSIZE-1):0] imm
-		.inst_read_mem(pipeline[MEMORY_STAGE].inst_read_mem) ,	// input  inst_read_mem
 		.inst_write_rd(pipeline[WRITEBACK_STAGE].inst_write_rd) 	// input  inst_write_rd
 	);
 	
@@ -250,8 +249,6 @@ module cpu (
 		.result(alu_result)
 	);
 	
-	assign rddata = pipeline[EXECUTION_STAGE].inst_write_pc_jal ? jal_return_address : alu_result;
-	
 	always_comb begin
 		execution_ff_d = 'x;
 		execution_ff_d.inst = pipeline[EXECUTION_STAGE].inst;
@@ -265,6 +262,7 @@ module cpu (
 		execution_ff_d.inst_write_pc_jal = pipeline[EXECUTION_STAGE].inst_write_pc_jal;
 		execution_ff_d.inst_write_mem = pipeline[EXECUTION_STAGE].inst_write_mem;
 		execution_ff_d.inst_read_mem = pipeline[EXECUTION_STAGE].inst_read_mem;
+		execution_ff_d.inst_change_pc_request = pipeline[EXECUTION_STAGE].inst_change_pc_request;
 		execution_ff_d.rs1data = !forward_A ? pipeline[EXECUTION_STAGE].rs1data : pipeline[forward_A_from].rddata;
 		execution_ff_d.rs2data = !forward_B ? pipeline[EXECUTION_STAGE].rs2data : pipeline[forward_B_from].rddata;
 	end
@@ -278,7 +276,7 @@ module cpu (
 	);
 	//////////////////////////////////////////////////////////////////
 	// Memory section
-	
+		
 	
 	// MMI
 	assign base_addr = 	(pipeline[MEMORY_STAGE].inst_read_mem || pipeline[MEMORY_STAGE].inst_write_mem) ? 
@@ -386,7 +384,7 @@ module cpu (
 		memory_ff_d = 'x;
 		memory_ff_d.inst = pipeline[MEMORY_STAGE].inst;
 		memory_ff_d.rd = pipeline[MEMORY_STAGE].rd;
-		memory_ff_d.rddata = pipeline[MEMORY_STAGE].rddata;
+		memory_ff_d.rddata = (pipeline[MEMORY_STAGE].inst_read_mem) ? reg_read_port : pipeline[MEMORY_STAGE].rddata;
 		memory_ff_d.inst_write_rd = pipeline[MEMORY_STAGE].inst_write_rd;
 	end
 	

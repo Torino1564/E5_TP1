@@ -19,16 +19,10 @@ module register_bank
 	input wire [ADD_BUS_WIDTH-1:0] rd,
 	input wire [WSIZE-1:0] rddata,
 	
-	// Memory
-	input logic [WSIZE-1:0] mem_read_port,
-	input wire [ADD_BUS_WIDTH-1:0] mem_rd,
-	input wire mem_ready,
-	
 	// Immediate
 	input wire [WSIZE-1:0] imm,
 	
 	// Instruction flags
-	input wire inst_read_mem,
 	input wire inst_write_rd
 );
 	// register bank
@@ -54,12 +48,8 @@ module register_bank
 			registers <= '{default: '0};
 		end
 		else if (ena) begin
-			if (inst_write_rd && rd != 0 && ~inst_read_mem)
+			if (inst_write_rd && rd != 0)
 				registers[rd] <= rddata;
-			else if (inst_read_mem && rd != 0) begin
-				if (mem_ready)
-					registers[rd] <= mem_read_port;
-			end
 		end
 	end
 endmodule

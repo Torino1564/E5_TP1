@@ -14,10 +14,13 @@ module halt_control(
 	output logic forward_B,
 	output logic [2:0] forward_B_from,
 	
+	input logic decode_change_pc_request,
+	
 	output reg [NUM_STAGES-1:0] stage_enable,
 	output reg [NUM_STAGES-1:0] stage_flush
 );
-	int i;
+	
+	// Forward logic
 	always_comb begin
 		if (~n_rst) begin
 			forward_A = 'b0;
@@ -53,6 +56,16 @@ module halt_control(
 		end
 	end
 	
+	reg stalling;
+	
+	always_ff @(posedge clk, negedge n_rst) begin
+		if (~n_rst)
+			stalling <= 1'b0;
+		else
+			stalling <= new_stalling;
+	end
+	
+	// Halt Logic
 	always_comb begin
 		if (~n_rst) begin
 			stage_enable = {NUM_STAGES{1'b0}};
@@ -61,14 +74,24 @@ module halt_control(
 		else begin
 			stage_enable = {NUM_STAGES{1'b1}};
 			stage_flush = {NUM_STAGES{1'b0}};
-			if (pipeline[MEMORY_STAGE].inst_read_mem && !mem_ready) begin
+			if (pipeline[MEMORY_STAGE].inst_read_mem && 
+				((pipeline[MEMORY_STAGE].rd == pipeline[EXECUTION_STAGE].rs1) ||
+					(pipeline[MEMORY_STAGE].rd == pipeline[EXECUTION_STAGE].rs2))) begin
 				stage_enable[FETCH_STAGE] = 1'b0;
+				stage_enable[DECODE_STAGE] = 1'b0;
+				stage_enable[REGISTER_STAGE] = 1'b0;
+				stage_enable[EXECUTION_STAGE] = 1'b0;
 			end
-			else if (pipeline[DECODE_STAGE].inst_change_pc_request) begin
-				stage_flush[FETCH_STAGE] = 1'b1;
-			end
-			else if (pipeline[REGISTER_STAGE].inst_change_pc_request)
+			else if (decode_change_pc_request) begin
 				stage_enable[FETCH_STAGE] = 1'b0;
+				if (pipeline[EXECUTION_STAGE].inst_change_pc_request) begin
+					stage_enable[DECODE_STAGE] = 1'b0;
+				end	
+				if (pipeline[EXECUTION_STAGE+1].inst_change_pc_request) begin
+					stage_enable[FETCH_STAGE] = 1'b1;
+					stage_flush[FETCH_STAGE] = 1'b1;
+				end
+			end
 		end
 	end
 
