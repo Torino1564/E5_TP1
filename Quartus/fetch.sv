@@ -14,13 +14,17 @@ module fetch (
 	input wire inst_change_pc
 );
 	wire [31:0] next_pc;
-	
+	reg [31:0] prev_pc;
 	always_ff @(posedge clk) begin
 		if (~n_rst) begin
 			pc <= 'b0;
+			prev_pc <= 'b0;
 		end
 		else if (ena) begin
 			pc <= next_pc;
+			prev_pc <= pc;
+		end else begin
+			pc <= prev_pc;
 		end
 	end
 	

@@ -41,12 +41,12 @@ module cpu (
 	wire [31:0] alu_result;
 
 	// Control Signals
-	wire inst_write_mem, inst_read_mem, inst_write_rd, inst_change_pc, inst_change_pc_request, inst_change_pc_ena, inst_write_pc_jal, inst_branch_condition;
+	wire inst_write_mem, inst_read_mem, inst_write_rd, inst_change_pc, inst_change_pc_request, inst_change_pc_ena, inst_write_pc_jal, branch_condition;
 	reg prev_inst_change_pc;
 	reg prev_inst_write_mem;
 	logic forward_A, forward_B;
 	logic [2:0] forward_B_from, forward_A_from;
-	reg  mem_ready;
+	logic  mem_ready;
 
 	// Jump instr
 	wire [31:0] jal_return_address;
@@ -99,13 +99,14 @@ module cpu (
 		.forward_A_from(forward_A_from),
 		.forward_B_from(forward_B_from),
 		.forward_B(forward_B),
+		.mem_ready(mem_ready),
 		.stage_enable(stage_enable),
 		.decode_change_pc_request(inst_change_pc_request),
 		.current_decode(decode_ff_d),
 		.stage_flush(stage_flush)
 	);
 	
-	assign inst_change_pc_ena = opcode == BRANCH ? inst_branch_condition : 1'b1;
+	assign inst_change_pc_ena = pipeline[EXECUTION_STAGE].opcode == BRANCH ? branch_condition : 1'b1;
 	assign inst_change_pc = pipeline[EXECUTION_STAGE].inst_change_pc_request & inst_change_pc_ena;
 	
 	// Fetch module
@@ -238,7 +239,7 @@ module cpu (
 		.B(B),
 		.op(op),
 		.jal_return_address(jal_return_address),
-		.branch_condition(inst_branch_condition)
+		.branch_condition(branch_condition)
 	);
 	
 	// ALU
@@ -276,16 +277,26 @@ module cpu (
 	);
 	//////////////////////////////////////////////////////////////////
 	// Memory section
-		
+	
+	reg [31:0] prev_address;
+	assign mem_ready = base_addr == prev_address;
+	
+	always_ff @(posedge clk, negedge n_rst) begin
+		if (~n_rst)
+			prev_address <= 'b0;
+		else begin
+			prev_address <= base_addr;
+		end
+	end
 	
 	// MMI
 	assign base_addr = 	(pipeline[MEMORY_STAGE].inst_read_mem || pipeline[MEMORY_STAGE].inst_write_mem) ? 
-								pipeline[MEMORY_STAGE].rddata  : 'x;
+								pipeline[MEMORY_STAGE].rddata  : prev_address;
 	
 	localparam NUM_DEVICES = 2;
 	localparam BaseAddresses DEVICE_MAP [NUM_DEVICES] = '{RAM, ROM};
 	localparam WORD_SIZE = 32;
-	localparam DEVICE_ADDRESS_SIZE = 13;
+	localparam DEVICE_ADDRESS_SIZE = 12;
 	localparam DEVICE_SELECTOR_MASK_SIZE = $bits(BaseAddresses);
 	
 	wire [DEVICE_ADDRESS_SIZE-1:0] addresses [NUM_DEVICES];
@@ -319,7 +330,7 @@ module cpu (
 		 .address(base_addr),
 		 .data_out(reg_write_port),
 		 .data_in(reg_read_port),
-		 .mem_ready(mem_ready),
+		 //.mem_ready(mem_ready),
 		 .mem_write(pipeline[MEMORY_STAGE].inst_write_mem)
 	);
 	
@@ -384,6 +395,7 @@ module cpu (
 		memory_ff_d = 'x;
 		memory_ff_d.inst = pipeline[MEMORY_STAGE].inst;
 		memory_ff_d.rd = pipeline[MEMORY_STAGE].rd;
+		memory_ff_d.reg_read_port = reg_read_port;
 		memory_ff_d.rddata = (pipeline[MEMORY_STAGE].inst_read_mem) ? reg_read_port : pipeline[MEMORY_STAGE].rddata;
 		memory_ff_d.inst_write_rd = pipeline[MEMORY_STAGE].inst_write_rd;
 	end

@@ -57,6 +57,7 @@ module halt_control(
 	end
 	
 	reg stalling;
+	reg new_stalling;
 	
 	always_ff @(posedge clk, negedge n_rst) begin
 		if (~n_rst)
@@ -70,13 +71,13 @@ module halt_control(
 		if (~n_rst) begin
 			stage_enable = {NUM_STAGES{1'b0}};
 			stage_flush = {NUM_STAGES{1'b1}};
+			new_stalling = 1'b1;
 		end
 		else begin
 			stage_enable = {NUM_STAGES{1'b1}};
 			stage_flush = {NUM_STAGES{1'b0}};
-			if (pipeline[MEMORY_STAGE].inst_read_mem && 
-				((pipeline[MEMORY_STAGE].rd == pipeline[EXECUTION_STAGE].rs1) ||
-					(pipeline[MEMORY_STAGE].rd == pipeline[EXECUTION_STAGE].rs2))) begin
+			new_stalling = 1'b0;
+			if (pipeline[MEMORY_STAGE].inst_read_mem && !mem_ready) begin
 				stage_enable[FETCH_STAGE] = 1'b0;
 				stage_enable[DECODE_STAGE] = 1'b0;
 				stage_enable[REGISTER_STAGE] = 1'b0;

@@ -8,6 +8,7 @@ package stage;
 		logic [31:0] imm;
 		logic [31:0] alu_result;
 		logic [31:0] rddata;
+		logic [31:0] reg_read_port;
 		logic [4:0] rs1;
 		logic [4:0] rs2;
 		logic [4:0] rd;
