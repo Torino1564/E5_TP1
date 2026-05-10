@@ -137,23 +137,16 @@ module decoder
 				imm = {{20{inst[31]}}, inst[31:20]};
 			end
 			S: begin 
-				imm[11:5] = inst[31:25];
-				imm[4:0] = inst[11:7];
+				imm = {{20{inst[31]}}, inst[31:25], inst[11:7]};
 			end
 			B: begin 
-				imm[12] = inst[31];
-				imm[10:5] = inst[30:25];
-				imm[4:1] = inst[11:8];
-				imm[11] = inst[7];
+				imm = {{19{inst[31]}}, inst[31], inst[7], inst[30:25], inst[11:8], 1'b0};
 			end
 			U: begin 
 				imm[31:12] = inst[31:12];
 			end
 			J: begin 
-				imm[20] = inst[31];
-				imm[10:1] = inst[30:21];
-				imm[11] = inst[20];
-				imm[19:12] = inst[19:12];
+				imm = {{11{inst[31]}}, inst[31], inst[19:12], inst[20], inst[30:21], 1'b0};
 			end
 			default: 
 				imm = '0;

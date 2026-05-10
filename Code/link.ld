@@ -1,11 +1,12 @@
 MEMORY {
-    ROM	(rx)  : ORIGIN = 0x10000000, LENGTH = 32K
-    RAM (rwx) : ORIGIN = 0x00000000, LENGTH = 32K
+    ROM	(rx)  : ORIGIN = 0x00000000, LENGTH = 32K
+    RAM (rwx) : ORIGIN = 0x10000000, LENGTH = 32K
 }
 
 SECTIONS {
 
-    .text 	: { *(.text*) } 		> ROM			/* Code */
+    .text 	: { KEEP(*(.text.start))
+		*(.text*) }			> ROM			/* Code */
     .rodata 	: { *(.rodata*) } 		> ROM			/* Read only data */
     .bss 	: { *(.bss*) } 			> RAM 			/* Zero initialized global variables */
     .data 	: {

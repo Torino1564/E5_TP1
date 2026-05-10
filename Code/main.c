@@ -1,14 +1,14 @@
 #include <stdlib.h>
 
-static char STATIC = 69;
+static int VALUE = 0xFEEDBEEF;
 
 int main()
 {
-    	char* p = (char*)malloc(10);
+    int* p = (int*)malloc(4);
 	
-	*p = STATIC;
+	*p = VALUE;
 	
-	char b = *p;
+	int b = *p;
 	
 	return b;
 }
