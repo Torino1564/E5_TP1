@@ -8,7 +8,6 @@ module cpu (
 	
 	output [31:0] outbusA
 );
-	localparam [31:0] NOP = 32'h0;
 	
 	// Instruction Decode
 	wire  [31:0] next_pc;
@@ -90,7 +89,7 @@ module cpu (
 	////////////////////////////////////////////////////////////////////////////////////////////
 	
 	// Halt Control
-	
+	wire stall;
 	halt_control halt_control_inst (
 		.clk(clk),
 		.n_rst(n_rst),
@@ -100,6 +99,7 @@ module cpu (
 		.forward_B_from(forward_B_from),
 		.forward_B(forward_B),
 		.mem_ready(mem_ready),
+		.stall(stall),
 		.stage_enable(stage_enable),
 		.decode_change_pc_request(inst_change_pc_request),
 		.current_decode(decode_ff_d),
@@ -120,7 +120,8 @@ module cpu (
 		.inst(inst),
 		.inst_change_pc(inst_change_pc),
 		.ena(stage_enable[FETCH_STAGE]),
-		.flush(stage_flush[FETCH_STAGE])
+		.flush(stage_flush[FETCH_STAGE]),
+		.stall(stall)
 	);
 	
 	always_comb begin
@@ -178,7 +179,7 @@ module cpu (
 		.ena(stage_enable[DECODE_STAGE]),
 		.n_rst(n_rst),
 		.d(decode_ff_d),
-		.q(pipeline[REGISTER_STAGE])
+		.q(pipeline[EXECUTION_STAGE])
 	);
 	
 	assign rddata = pipeline[EXECUTION_STAGE].inst_write_pc_jal ? jal_return_address : alu_result;
@@ -187,43 +188,15 @@ module cpu (
 	(
 		.clk(clk) ,	// input  clk
 		.n_rst(n_rst) ,	// input  n_rst
-		.ena(stage_enable[REGISTER_STAGE]),
-		.rs1(pipeline[REGISTER_STAGE].rs1) ,	// input [(ADD_BUS_WIDTH-1):0] rs1
-		.rs2(pipeline[REGISTER_STAGE].rs2) ,	// input [(ADD_BUS_WIDTH-1):0] rs2
-		.rs1data(rs1data) ,	// output [(WSIZE-1):0] rs1data
-		.rs2data(rs2data) ,	// output [(WSIZE-1):0] rs2data
+		.ena(stage_enable[WRITEBACK_STAGE]),
+		.rs1(pipeline[EXECUTION_STAGE].rs1) ,	// input [(ADD_BUS_WIDTH-1):0] rs1
+		.rs2(pipeline[EXECUTION_STAGE].rs2) ,	// input [(ADD_BUS_WIDTH-1):0] rs2
+		.rs1data(rs1data),	// output [(WSIZE-1):0] rs1data
+		.rs2data(rs2data),	// output [(WSIZE-1):0] rs2data
 		.rd(pipeline[WRITEBACK_STAGE].rd) ,	// input [(ADD_BUS_WIDTH-1):0] rd
 		.rddata(pipeline[WRITEBACK_STAGE].rddata) ,	// input [(WSIZE-1):0] rddata
-		.imm(pipeline[REGISTER_STAGE].imm) ,	// input [(WSIZE-1):0] imm
+		.imm(pipeline[EXECUTION_STAGE].imm) ,	// input [(WSIZE-1):0] imm
 		.inst_write_rd(pipeline[WRITEBACK_STAGE].inst_write_rd) 	// input  inst_write_rd
-	);
-	
-	always_comb begin
-		register_ff_d = 'x;
-		register_ff_d.rs1data = rs1data;
-		register_ff_d.rs2data = rs2data;
-		register_ff_d.inst = pipeline[REGISTER_STAGE].inst;
-		register_ff_d.rs1 = pipeline[REGISTER_STAGE].rs1;
-		register_ff_d.rs2 = pipeline[REGISTER_STAGE].rs2;
-		register_ff_d.rd = pipeline[REGISTER_STAGE].rd;
-		register_ff_d.func3 = pipeline[REGISTER_STAGE].func3;
-		register_ff_d.func7 = pipeline[REGISTER_STAGE].func7;
-		register_ff_d.imm = pipeline[REGISTER_STAGE].imm;
-		register_ff_d.opcode = pipeline[REGISTER_STAGE].opcode;
-		register_ff_d.pc = pipeline[REGISTER_STAGE].pc;
-		register_ff_d.inst_write_rd = pipeline[REGISTER_STAGE].inst_write_rd;
-		register_ff_d.inst_write_pc_jal = pipeline[REGISTER_STAGE].inst_write_pc_jal;
-		register_ff_d.inst_write_mem = pipeline[REGISTER_STAGE].inst_write_mem;
-		register_ff_d.inst_change_pc_request = pipeline[REGISTER_STAGE].inst_change_pc_request;
-		register_ff_d.inst_read_mem = pipeline[REGISTER_STAGE].inst_read_mem;
-	end
-	
-	ff #(.SIZE(STAGE_SIZE)) register_stage (
-		.clk(clk),
-		.ena(stage_enable[REGISTER_STAGE]),
-		.n_rst(n_rst),
-		.d(register_ff_d),
-		.q(pipeline[EXECUTION_STAGE])
 	);
 	
 	// Op builder
@@ -264,8 +237,8 @@ module cpu (
 		execution_ff_d.inst_write_mem = pipeline[EXECUTION_STAGE].inst_write_mem;
 		execution_ff_d.inst_read_mem = pipeline[EXECUTION_STAGE].inst_read_mem;
 		execution_ff_d.inst_change_pc_request = pipeline[EXECUTION_STAGE].inst_change_pc_request;
-		execution_ff_d.rs1data = !forward_A ? pipeline[EXECUTION_STAGE].rs1data : pipeline[forward_A_from].rddata;
-		execution_ff_d.rs2data = !forward_B ? pipeline[EXECUTION_STAGE].rs2data : pipeline[forward_B_from].rddata;
+		execution_ff_d.rs1data = !forward_A ? rs1data : pipeline[forward_A_from].rddata;
+		execution_ff_d.rs2data = !forward_B ? rs2data : pipeline[forward_B_from].rddata;
 	end
 	
 	ff #(.SIZE(STAGE_SIZE)) execution_stage (
@@ -396,8 +369,9 @@ module cpu (
 		memory_ff_d.inst = pipeline[MEMORY_STAGE].inst;
 		memory_ff_d.rd = pipeline[MEMORY_STAGE].rd;
 		memory_ff_d.reg_read_port = reg_read_port;
-		memory_ff_d.rddata = (pipeline[MEMORY_STAGE].inst_read_mem) ? reg_read_port : pipeline[MEMORY_STAGE].rddata;
-		memory_ff_d.inst_write_rd = pipeline[MEMORY_STAGE].inst_write_rd;
+		memory_ff_d.rddata = (pipeline[MEMORY_STAGE].inst_read_mem || pipeline[MEMORY_STAGE].inst_write_mem) ? reg_read_port : pipeline[MEMORY_STAGE].rddata;
+		memory_ff_d.inst_write_rd = (pipeline[MEMORY_STAGE].inst_read_mem) ? mem_ready : pipeline[MEMORY_STAGE].inst_write_rd;
+		memory_ff_d.inst_change_pc_request = pipeline[MEMORY_STAGE].inst_change_pc_request;
 	end
 	
 	ff #(.SIZE(STAGE_SIZE)) memory_stage (

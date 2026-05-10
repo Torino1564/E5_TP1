@@ -31,7 +31,6 @@ package stage;
 	typedef enum logic [2:0] {
 		FETCH_STAGE,
 		DECODE_STAGE,
-		REGISTER_STAGE,
 		EXECUTION_STAGE,
 		MEMORY_STAGE,
 		WRITEBACK_STAGE,

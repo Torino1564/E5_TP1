@@ -1,11 +1,14 @@
+import opcodes::*;
+
 module fetch (
 	input wire clk,
 	input wire n_rst,
 	input wire ena,
 	input wire flush,
+	input wire stall,
 	
 	output wire [11:0] instruction_address,
-	output reg [31:0] pc,
+	output wire [31:0] pc,
 	
 	input wire [31:0] rom_out_port,
 	input wire [31:0] alu_result,
@@ -15,21 +18,27 @@ module fetch (
 );
 	wire [31:0] next_pc;
 	reg [31:0] prev_pc;
+	reg [31:0] current_pc;
 	always_ff @(posedge clk) begin
 		if (~n_rst) begin
-			pc <= 'b0;
+			current_pc <= 'b0;
 			prev_pc <= 'b0;
 		end
 		else if (ena) begin
-			pc <= next_pc;
-			prev_pc <= pc;
-		end else begin
-			pc <= prev_pc;
+			if (!stall) begin
+				current_pc <= next_pc;
+				prev_pc <= current_pc;
+			end else begin
+				current_pc <= prev_pc;
+			end
+			if (inst_change_pc)
+				current_pc <= alu_result + 'd4;
 		end
 	end
 	
-	assign next_pc = ~inst_change_pc ? pc + 'd4 : alu_result;
-	assign instruction_address = pc[14:2];
-	assign inst = (~flush) ? rom_out_port : 'b0;
+	assign next_pc = current_pc + 'd4;
+	assign instruction_address = ~inst_change_pc ? current_pc[14:2] : alu_result[14:2];
+	assign inst = (~flush) ? (stall ? STALL_INST : rom_out_port ): NOP;
+	assign pc = prev_pc;
 
 endmodule

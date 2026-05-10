@@ -47,7 +47,7 @@ module mmi // Memory mux interface
 		mem_ready = 'b0;
 		for (int j = 0; j < NUM_DEVICES; j++) begin
 			if (selector[j]) begin
-				data_in = data_in_connectors[j];
+				data_in = mem_write ? data_out : data_in_connectors[j];
 				mem_ready = mem_ready_connectors[j];
 			end
 		end
