@@ -1,14 +1,12 @@
-#include <stdlib.h>
-
 static int VALUE = 0xFEEDBEEF;
-
+static int* ADDRESS = (int*)0x10000100;
 int main()
 {
-    int* p = (int*)malloc(4);
+    int* p = ADDRESS;
 	
-	*p = VALUE;
+    *p = VALUE;
 	
-	int b = *p;
+    int b = *p;
 	
-	return b;
+    return b;
 }

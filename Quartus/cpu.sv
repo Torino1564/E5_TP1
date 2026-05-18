@@ -125,8 +125,8 @@ module cpu (
 	);
 	
 	always_comb begin
-		fetch_ff_d = valid;
 		fetch_ff_d = 'x;
+		fetch_ff_d.valid = valid;
 		fetch_ff_d.inst = inst;
 		fetch_ff_d.pc = pc;
 	end
