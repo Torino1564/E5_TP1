@@ -1,44 +1,57 @@
-import opcodes::*;
-
 module fetch (
-	input wire clk,
-	input wire n_rst,
-	input wire ena,
-	input wire flush,
-	input wire stall,
-	
-	output wire [11:0] instruction_address,
-	output wire [31:0] pc,
-	
-	input wire [31:0] rom_out_port,
-	input wire [31:0] alu_result,
-	output wire [31:0] inst,
-	
-	input wire inst_change_pc
+    input  wire        clk,
+    input  wire        n_rst,
+
+    input  wire        ena,
+    input  wire        flush,
+
+    input  wire        branch_taken,
+    input  wire [31:0] branch_target,
+
+    output wire [11:0] instruction_address,
+    input  wire [31:0] rom_out_port,
+
+    output logic       valid,
+    output logic [31:0] inst,
+    output logic [31:0] pc
 );
-	wire [31:0] next_pc;
-	reg [31:0] prev_pc;
-	reg [31:0] current_pc;
-	always_ff @(posedge clk) begin
-		if (~n_rst) begin
-			current_pc <= 'b0;
-			prev_pc <= 'b0;
-		end
-		else if (ena) begin
-			if (!stall) begin
-				current_pc <= next_pc;
-				prev_pc <= current_pc;
-			end else begin
-				current_pc <= prev_pc;
-			end
-			if (inst_change_pc)
-				current_pc <= alu_result + 'd4;
-		end
-	end
-	
-	assign next_pc = current_pc + 'd4;
-	assign instruction_address = ~inst_change_pc ? current_pc[14:2] : alu_result[14:2];
-	assign inst = (~flush) ? (stall ? STALL_INST : rom_out_port ): NOP;
-	assign pc = prev_pc;
+
+    logic [31:0] current_pc;
+    logic [31:0] next_pc;
+
+    always_comb begin
+        next_pc = current_pc + 32'd4;
+
+        if (branch_taken)
+            next_pc = branch_target;
+    end
+
+
+    always_ff @(posedge clk) begin
+        if (!n_rst)
+            current_pc <= 32'b0;
+        else if (ena)
+            current_pc <= next_pc;
+    end
+
+    assign instruction_address = current_pc[14:2];
+
+    always_ff @(posedge clk) begin
+        if (!n_rst) begin
+            valid <= 1'b0;
+            inst  <= 32'b0;
+            pc    <= 32'b0;
+        end
+        else if (ena) begin
+            if (flush) begin
+                valid <= 1'b0;
+            end
+            else begin
+                valid <= 1'b1;
+                inst  <= rom_out_port;
+                pc    <= current_pc;
+            end
+        end
+    end
 
 endmodule

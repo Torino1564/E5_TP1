@@ -7,6 +7,8 @@ module mmi // Memory mux interface
 	parameter logic [BIT_SIZE-1:0] BASE_ADDR [NUM_DEVICES] = '{default:'h0}
 	
 )(
+	input wire ena,
+	
 	// Device connections
 	output wire [DEVICE_ADDRESS_SIZE-1:0] address_connectors [NUM_DEVICES],
 	output wire [WORD_SIZE-1:0] data_out_connectors [NUM_DEVICES],
@@ -27,7 +29,7 @@ module mmi // Memory mux interface
 	genvar i;
 	generate
 		for (i = 0; i < NUM_DEVICES; i++) begin : SELECTOR
-			assign selector[i] =  (address[WORD_SIZE-1 -: BIT_SIZE]) == BASE_ADDR[i];
+			assign selector[i] =  ena ? ((address[WORD_SIZE-1 -: BIT_SIZE]) == BASE_ADDR[i]): 'b0;
 		end
 	endgenerate
 	

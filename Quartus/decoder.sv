@@ -3,7 +3,7 @@ import opcodes::*;
 module decoder
 (
 	input wire [31:0] inst,
-	
+	input wire ena,
 	output reg [4:0] rs1,
 	output reg [4:0] rs2,
 	output reg [4:0] rd,
@@ -26,18 +26,22 @@ module decoder
 	// Resolve instruction type
 	reg [2:0] inst_type;
 	always_comb begin
-		case (opcode)
-			LOAD: 		inst_type = I;	// LOAD
-			OP: 			inst_type = R;	// OP
-			OP_IMM: 		inst_type = I;	// OP-IMM
-			STORE: 		inst_type = S;	// STORE
-			BRANCH: 		inst_type = B;	// BRANCH
-			JAL: 			inst_type = J;	// JAL
-			JALR:			inst_type = I;	// JALR
-			LUI: 			inst_type = U;	// LUI
-			AUIPC: 		inst_type = U;	// AUIPC
-			default:		inst_type = E; // ERROR
-		endcase
+		if (!ena)
+			inst_type = E;
+		else begin
+			case (opcode)
+				LOAD: 		inst_type = I;	// LOAD
+				OP: 			inst_type = R;	// OP
+				OP_IMM: 		inst_type = I;	// OP-IMM
+				STORE: 		inst_type = S;	// STORE
+				BRANCH: 		inst_type = B;	// BRANCH
+				JAL: 			inst_type = J;	// JAL
+				JALR:			inst_type = I;	// JALR
+				LUI: 			inst_type = U;	// LUI
+				AUIPC: 		inst_type = U;	// AUIPC
+				default:		inst_type = E; // ERROR or BUBBLE
+			endcase
+		end
 	end
 	
 	// Assign outputs

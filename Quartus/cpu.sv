@@ -99,15 +99,15 @@ module cpu (
 		.forward_B_from(forward_B_from),
 		.forward_B(forward_B),
 		.mem_ready(mem_ready),
-		.stall(stall),
 		.stage_enable(stage_enable),
-		.decode_change_pc_request(inst_change_pc_request),
-		.current_decode(decode_ff_d),
+		.branch_taken(inst_change_pc),
 		.stage_flush(stage_flush)
 	);
 	
 	assign inst_change_pc_ena = pipeline[EXECUTION_STAGE].opcode == BRANCH ? branch_condition : 1'b1;
 	assign inst_change_pc = pipeline[EXECUTION_STAGE].inst_change_pc_request & inst_change_pc_ena;
+	
+	wire valid;
 	
 	// Fetch module
 	fetch fetch_inst (
@@ -116,15 +116,16 @@ module cpu (
 		.instruction_address(instruction_address),
 		.pc(pc),
 		.rom_out_port(rom_q_a_sig),
-		.alu_result(alu_result),
+		.branch_target(alu_result),
 		.inst(inst),
-		.inst_change_pc(inst_change_pc),
+		.branch_taken(inst_change_pc),
 		.ena(stage_enable[FETCH_STAGE]),
 		.flush(stage_flush[FETCH_STAGE]),
-		.stall(stall)
+		.valid(valid)
 	);
 	
 	always_comb begin
+		fetch_ff_d = valid;
 		fetch_ff_d = 'x;
 		fetch_ff_d.inst = inst;
 		fetch_ff_d.pc = pc;
@@ -133,6 +134,7 @@ module cpu (
 	ff #(.SIZE(STAGE_SIZE)) fetch_stage (
 		.clk(clk),
 		.ena(stage_enable[FETCH_STAGE]),
+		.flush(stage_flush[FETCH_STAGE]),
 		.n_rst(n_rst),
 		.d(fetch_ff_d),
 		.q(pipeline[DECODE_STAGE])
@@ -141,6 +143,7 @@ module cpu (
 	
 	// Decoder
 	decoder decoder_inst (
+		.ena(pipeline[DECODE_STAGE].valid),
 		.inst(pipeline[DECODE_STAGE].inst),
 		.rs1(rs1),
 		.rs2(rs2),
@@ -158,6 +161,7 @@ module cpu (
 	
 	always_comb begin
 		decode_ff_d = 'x;
+		decode_ff_d.valid = pipeline[DECODE_STAGE].valid;
 		decode_ff_d.inst = pipeline[DECODE_STAGE].inst;
 		decode_ff_d.pc = pipeline[DECODE_STAGE].pc;
 		decode_ff_d.rs1 = rs1;
@@ -177,6 +181,7 @@ module cpu (
 	ff #(.SIZE(STAGE_SIZE)) decode_stage (
 		.clk(clk),
 		.ena(stage_enable[DECODE_STAGE]),
+		.flush(stage_flush[DECODE_STAGE]),
 		.n_rst(n_rst),
 		.d(decode_ff_d),
 		.q(pipeline[EXECUTION_STAGE])
@@ -188,7 +193,7 @@ module cpu (
 	(
 		.clk(clk) ,	// input  clk
 		.n_rst(n_rst) ,	// input  n_rst
-		.ena(stage_enable[WRITEBACK_STAGE]),
+		.ena(pipeline[WRITEBACK_STAGE].valid),
 		.rs1(pipeline[EXECUTION_STAGE].rs1) ,	// input [(ADD_BUS_WIDTH-1):0] rs1
 		.rs2(pipeline[EXECUTION_STAGE].rs2) ,	// input [(ADD_BUS_WIDTH-1):0] rs2
 		.rs1data(rs1data),	// output [(WSIZE-1):0] rs1data
@@ -217,6 +222,7 @@ module cpu (
 	
 	// ALU
 	ALU alu_inst (
+		.ena(pipeline[EXECUTION_STAGE].valid),
 		.op(op),
 		.A(A),
 		.B(B),
@@ -226,6 +232,7 @@ module cpu (
 	always_comb begin
 		execution_ff_d = 'x;
 		execution_ff_d.inst = pipeline[EXECUTION_STAGE].inst;
+		execution_ff_d.valid = pipeline[EXECUTION_STAGE].valid;
 		execution_ff_d.rd = pipeline[EXECUTION_STAGE].rd;
 		execution_ff_d.rs1 = pipeline[EXECUTION_STAGE].rs1;
 		execution_ff_d.rs2 = pipeline[EXECUTION_STAGE].rs2;
@@ -244,6 +251,7 @@ module cpu (
 	ff #(.SIZE(STAGE_SIZE)) execution_stage (
 		.clk(clk),
 		.ena(stage_enable[EXECUTION_STAGE]),
+		.flush(stage_flush[EXECUTION_STAGE]),
 		.n_rst(n_rst),
 		.d(execution_ff_d),
 		.q(pipeline[MEMORY_STAGE])
@@ -294,6 +302,7 @@ module cpu (
 		 .BIT_SIZE(DEVICE_SELECTOR_MASK_SIZE),
 		 .BASE_ADDR(DEVICE_MAP)
 	) mmi_inst (
+		 .ena(pipeline[MEMORY_STAGE].valid),
 		 .address_connectors(addresses),
 		 .data_out_connectors(data_outs),
 		 .mem_write_connectors(mem_writes),
@@ -366,6 +375,7 @@ module cpu (
 	
 	always_comb begin
 		memory_ff_d = 'x;
+		memory_ff_d.valid = pipeline[MEMORY_STAGE].valid;
 		memory_ff_d.inst = pipeline[MEMORY_STAGE].inst;
 		memory_ff_d.rd = pipeline[MEMORY_STAGE].rd;
 		memory_ff_d.reg_read_port = reg_read_port;
@@ -377,6 +387,7 @@ module cpu (
 	ff #(.SIZE(STAGE_SIZE)) memory_stage (
 		.clk(clk),
 		.ena(stage_enable[MEMORY_STAGE]),
+		.flush(stage_flush[MEMORY_STAGE]),
 		.n_rst(n_rst),
 		.d(memory_ff_d),
 		.q(pipeline[WRITEBACK_STAGE])

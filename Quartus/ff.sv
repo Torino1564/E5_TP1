@@ -3,6 +3,7 @@ module ff #(
 )(
 	input 	logic clk,
 	input 	logic ena,
+	input		logic flush,
 	input 	logic n_rst,
 	
 	input 	logic [SIZE-1:0] d,
@@ -11,7 +12,9 @@ module ff #(
 
 	always_ff @(posedge clk, negedge n_rst) begin
 		if (~n_rst)
-			q <= '0;
+			q <= 'b0;
+		else if (flush)
+			q <= 'b0;
 		else if (ena) 
 			q <= d;
 	end

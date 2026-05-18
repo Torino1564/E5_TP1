@@ -3,6 +3,7 @@ import operations::*;
 module ALU(
 	
 	// INPUTS
+	input wire ena,
 	input wire [6:0] op,
 	input wire signed [31:0] A,
 	input wire signed [31:0] B,
@@ -17,22 +18,26 @@ module ALU(
 	assign u_B = B;
 	
 	always_comb begin
-		case (op)
-			ADD: result = A + B;
-			SUB: result = A - B;
-			AND: result = A & B;
-			OR: result = A | B;
-			XOR: result = A ^ B;
-			LESS: result = A < B;
-			ULESS: result = u_A < u_B;
-			LESSEQ: result = A <= B;
-			EQ: result = A	== B;
-			SLL: result = A << u_B;
-			SRL: result = A >> u_B;
-			SRA: result = A >>> u_B;
-			OA: result = A;
-			default: result = 'b0;
-		endcase
+		if (!ena)
+			result = 'b0;
+		else begin
+			case (op)
+				ADD: result = A + B;
+				SUB: result = A - B;
+				AND: result = A & B;
+				OR: result = A | B;
+				XOR: result = A ^ B;
+				LESS: result = A < B;
+				ULESS: result = u_A < u_B;
+				LESSEQ: result = A <= B;
+				EQ: result = A	== B;
+				SLL: result = A << u_B;
+				SRL: result = A >> u_B;
+				SRA: result = A >>> u_B;
+				OA: result = A;
+				default: result = 'b0;
+			endcase
+		end
 	end
 	
 endmodule

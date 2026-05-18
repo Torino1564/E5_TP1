@@ -1,6 +1,7 @@
 package stage;
 
 	typedef struct packed {
+		logic valid;
 		logic [31:0] pc;
 		logic [31:0] inst;
 		logic [31:0] rs1data;
