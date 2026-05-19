@@ -7,6 +7,9 @@ module halt_control(
 	
 	input stage_t pipeline[NUM_STAGES],
 	
+	input logic [4:0] decode_rs1,
+	input logic [4:0] decode_rs2,
+	
 	input wire mem_ready,
 	
 	output logic forward_A,
@@ -38,26 +41,30 @@ module halt_control(
 			forward_B_from = 'b0;
 			
 			if (pipeline[EXECUTION_STAGE].valid && pipeline[EXECUTION_STAGE].rs1 != 'b0) begin
-				if (pipeline[EXECUTION_STAGE].rs1 == pipeline[MEMORY_STAGE].rd) begin
+				if (pipeline[MEMORY_STAGE].valid &&
+					(pipeline[EXECUTION_STAGE].rs1 == pipeline[MEMORY_STAGE].rd) &&
+					(pipeline[MEMORY_STAGE].rd != 0)) begin
 					forward_A 		= 1'b1;
 					forward_A_from = MEMORY_STAGE;
 				end
-				else if (pipeline[MEMORY_STAGE].valid &&
-									pipeline[WRITEBACK_STAGE].rd != 0 &&
-									(pipeline[EXECUTION_STAGE].rs1 == pipeline[WRITEBACK_STAGE].rd)) begin
+				else if (pipeline[WRITEBACK_STAGE].valid &&
+							pipeline[WRITEBACK_STAGE].rd != 0 &&
+							(pipeline[EXECUTION_STAGE].rs1 == pipeline[WRITEBACK_STAGE].rd)) begin
 					forward_A 		= 1'b1;
 					forward_A_from = WRITEBACK_STAGE;
 				end
 			end
 			
 			if (pipeline[EXECUTION_STAGE].valid && pipeline[EXECUTION_STAGE].rs2 != 'b0) begin
-				if (pipeline[EXECUTION_STAGE].rs2 == pipeline[MEMORY_STAGE].rd) begin
+				if (pipeline[MEMORY_STAGE].valid &&
+					(pipeline[EXECUTION_STAGE].rs2 == pipeline[MEMORY_STAGE].rd) &&
+					(pipeline[MEMORY_STAGE].rd != 0)) begin
 					forward_B 		= 1'b1;
 					forward_B_from = MEMORY_STAGE;
 				end
-				else if (pipeline[MEMORY_STAGE].valid &&
-									pipeline[WRITEBACK_STAGE].rd != 0 &&
-									(pipeline[EXECUTION_STAGE].rs2 == pipeline[WRITEBACK_STAGE].rd)) begin
+				else if (pipeline[WRITEBACK_STAGE].valid &&
+							pipeline[WRITEBACK_STAGE].rd != 0 &&
+							(pipeline[EXECUTION_STAGE].rs2 == pipeline[WRITEBACK_STAGE].rd)) begin
 					forward_B 		= 1'b1;
 					forward_B_from = WRITEBACK_STAGE;
 				end
@@ -73,8 +80,8 @@ module halt_control(
 				pipeline[EXECUTION_STAGE].valid &&
 				pipeline[EXECUTION_STAGE].inst_read_mem &&
 				pipeline[EXECUTION_STAGE].rd != 0) begin
-			if ( (pipeline[DECODE_STAGE].rs1 == pipeline[EXECUTION_STAGE].rd) ||
-              (pipeline[DECODE_STAGE].rs2 == pipeline[EXECUTION_STAGE].rd)
+			if ( (decode_rs1 == pipeline[EXECUTION_STAGE].rd) ||
+              (decode_rs2 == pipeline[EXECUTION_STAGE].rd)
             ) begin
 				load_use_hazard = 1'b1;
          end
@@ -102,7 +109,7 @@ module halt_control(
 			else if (load_use_hazard) begin
 				stage_enable[FETCH_STAGE] 		= 1'b0;
 				stage_enable[DECODE_STAGE] 	= 1'b0;
-				stage_flush[EXECUTION_STAGE] 	= 1'b1;
+				stage_flush[DECODE_STAGE] 	= 1'b1;
 			end
 			
 			if (branch_taken) begin

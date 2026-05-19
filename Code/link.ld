@@ -1,35 +1,59 @@
 MEMORY {
-    ROM	(rx)  : ORIGIN = 0x00000000, LENGTH = 32K
+    ROM (rx)  : ORIGIN = 0x00000000, LENGTH = 32K
     RAM (rwx) : ORIGIN = 0x10000000, LENGTH = 32K
 }
 
 SECTIONS {
 
-    .text 	: { KEEP(*(.text.start))
-		*(.text*) }			> ROM			/* Code */
-    .rodata 	: { *(.rodata*) } 		> ROM			/* Read only data */
-    .bss 	: { *(.bss*) } 			> RAM 			/* Zero initialized global variables */
-    .data 	: {
-	 . = ALIGN(4);
-	 *(.data*) 				
-    	 *(.sdata*)
-	 . = ALIGN(8);
-         PROVIDE( __global_pointer$ = . + 0x800 ); 
-     }						> RAM AT> ROM		/* Non zero initialized global variables. Loader finds them at ROM, then found in RAM at runtime */ 
-    
-    _heap_start = .;
-}					
+    .text :
+    {
+        KEEP(*(.text.start))
+        *(.text*)
+    } > ROM
 
-__bss_start = ADDR(.bss);
-__bss_end = __bss_start + SIZEOF(.bss);
+    .rodata :
+    {
+        *(.rodata*)
+    } > ROM
+
+    .data :
+    {
+        . = ALIGN(4);
+
+        __data_start = .;
+
+        *(.data*)
+        *(.sdata*)
+
+        . = ALIGN(8);
+
+        PROVIDE(__global_pointer$ = . + 0x800);
+
+        __data_end = .;
+    } > RAM AT> ROM
+
+    .bss :
+    {
+        . = ALIGN(4);
+
+        __bss_start = .;
+
+        *(.bss*)
+        *(COMMON)
+
+        . = ALIGN(4);
+
+        __bss_end = .;
+    } > RAM
+
+    _end = .;
+    _heap_start = .;
+}
 
 __data_load = LOADADDR(.data);
-__data_start = ADDR(.data);
-__data_end = __data_start + SIZEOF(.data);
 
 _heap_end = ORIGIN(RAM) + LENGTH(RAM);
 
 _stack_top = ORIGIN(RAM) + LENGTH(RAM);
 
-ENTRY(_start);
-_end = 0xFF;
+ENTRY(_start)

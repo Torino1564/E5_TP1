@@ -97,6 +97,8 @@ module cpu (
 		.forward_A(forward_A),
 		.forward_A_from(forward_A_from),
 		.forward_B_from(forward_B_from),
+		.decode_rs1(rs1),
+		.decode_rs2(rs2),
 		.forward_B(forward_B),
 		.mem_ready(mem_ready),
 		.stage_enable(stage_enable),

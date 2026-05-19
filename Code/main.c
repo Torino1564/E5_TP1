@@ -1,8 +1,8 @@
-static int VALUE = 0xFEEDBEEF;
-static int* ADDRESS = (int*)0x10000100;
+static const int VALUE = 0xFEEDBEEF;
+static const int ADDRESS = 0x10000100;
 int main()
 {
-    int* p = ADDRESS;
+    int* p = (int*)ADDRESS;
 	
     *p = VALUE;
 	
