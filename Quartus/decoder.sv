@@ -50,7 +50,7 @@ module decoder
 	always_comb begin
 		case (opcode)
 			JAL, JALR:
-				inst_write_pc_jal = 1'b1;
+				inst_write_pc_jal = inst_type != E ? 1'b1 : 1'b0;
 			default:
 				inst_write_pc_jal = 1'b0;
 		endcase
@@ -76,7 +76,7 @@ module decoder
 	always_comb begin
 		case (opcode)
 			JAL, JALR, BRANCH:
-				inst_change_pc = 1'b1;
+				inst_change_pc = inst_type != E ? 1'b1 : 1'b0;
 			default:
 				inst_change_pc = 1'b0;
 		endcase

@@ -206,6 +206,7 @@ module cpu (
 	
 	// Op builder
 	operand_builder operand_builder_inst (
+		.ena(pipeline[EXECUTION_STAGE].valid),
 		.rs1data(execution_ff_d.rs1data),
 		.rs2data(execution_ff_d.rs2data),
 		.imm(pipeline[EXECUTION_STAGE].imm),
@@ -367,7 +368,7 @@ module cpu (
 		.rden_b(rden_sig),
 		.clock_a(clk),
 		.clock_b(rom_clk),
-		.enable_a(clock_rom_en_sig),
+		.enable_a(stage_enable[FETCH_STAGE]),
 		.enable_b(clock_rom_en_sig),
 		.q_a(rom_q_a_sig),
 		.q_b(rom_q_b_sig)

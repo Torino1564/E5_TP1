@@ -17,7 +17,9 @@ module fetch (
 );
 
     logic [31:0] current_pc;
+    logic [31:0] pc_bar;
     logic [31:0] next_pc;
+	 logic flush_bar;
 
     always_comb begin
         next_pc = current_pc + 32'd4;
@@ -38,19 +40,18 @@ module fetch (
 
     always_ff @(posedge clk) begin
         if (!n_rst) begin
-            valid <= 1'b0;
-            inst  <= 32'b0;
-            pc    <= 32'b0;
+            valid  		<= 1'b0;
+            inst   		<= 32'b0;
+            pc     		<= 32'b0;
+				pc_bar 		<= 32'b0;
+				flush_bar	<= 1'b0;
         end
         else if (ena) begin
-            if (flush) begin
-                valid <= 1'b0;
-            end
-            else begin
-                valid <= 1'b1;
-                inst  <= rom_out_port;
-                pc    <= current_pc;
-            end
+				flush_bar 	<= flush;
+				inst  		<= rom_out_port;
+				pc_bar		<= current_pc;
+				pc 			<= pc_bar;
+            valid 		<= (flush || flush_bar) ? 1'b0 : 1'b1;
         end
     end
 

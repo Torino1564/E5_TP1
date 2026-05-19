@@ -29,7 +29,8 @@ module ALU(
 				XOR: result = A ^ B;
 				LESS: result = A < B;
 				ULESS: result = u_A < u_B;
-				LESSEQ: result = A <= B;
+				GREATEQ: result = A >= B;
+				GREATEQU: result = u_A >= u_B;
 				EQ: result = A	== B;
 				SLL: result = A << u_B;
 				SRL: result = A >> u_B;

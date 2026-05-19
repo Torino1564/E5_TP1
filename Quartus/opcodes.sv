@@ -10,10 +10,9 @@ package opcodes;
 			JALR		= 	7'b1100111,
 			LUI		=  7'b0110111,
 			AUIPC		=  7'b0010111,
-			STALL    =  7'b1111111
+			BUBBLE   =  7'b1111111
 	} Opcodes;
 	
-	localparam [31:0] STALL_INST = 32'h0000007F;
 	localparam [31:0] NOP = 32'h0000000F;
 
 endpackage
