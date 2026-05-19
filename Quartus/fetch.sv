@@ -1,17 +1,17 @@
 module fetch (
-    input  wire        clk,
-    input  wire        n_rst,
+    input  wire clk,
+    input  wire n_rst,
 
-    input  wire        ena,
-    input  wire        flush,
+    input  wire ena,
+    input  wire flush,
 
-    input  wire        branch_taken,
+    input  wire branch_taken,
     input  wire [31:0] branch_target,
 
     output wire [11:0] instruction_address,
     input  wire [31:0] rom_out_port,
 
-    output logic       valid,
+    output logic valid,
     output logic [31:0] inst,
     output logic [31:0] pc
 );
