@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deploy
+ date="2026.05.21.13:02:54"
+ outputDirectory="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/">
+ <perimeter>
+  <parameter
+     name="AUTO_GENERATION_ID"
+     type="Integer"
+     defaultValue="0"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_UNIQUE_ID"
+     type="String"
+     defaultValue=""
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE_FAMILY"
+     type="String"
+     defaultValue="Cyclone V"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE"
+     type="String"
+     defaultValue="5CEBA2F17A7"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE_SPEEDGRADE"
+     type="String"
+     defaultValue="7"
+     onHdl="0"
+     affectsHdl="1" />
+  <interface name="s1" kind="nios_custom_instruction" start="0">
+   <property name="CIName" value="" />
+   <property name="NPort" value="3" />
+   <property name="clockCycle" value="1" />
+   <property name="clockCycleType" value="VARIABLE" />
+   <property name="opcodeExtension" value="0" />
+   <property name="opcodeExtensionLocked" value="true" />
+   <property name="opcodeExtensionLockedValue" value="248" />
+   <property name="operands" value="2" />
+   <port name="clk" direction="input" role="clk" width="1" />
+   <port name="clk_en" direction="input" role="clk_en" width="1" />
+   <port name="dataa" direction="input" role="dataa" width="32" />
+   <port name="datab" direction="input" role="datab" width="32" />
+   <port name="n" direction="input" role="n" width="3" />
+   <port name="reset" direction="input" role="reset" width="1" />
+   <port name="reset_req" direction="input" role="reset_req" width="1" />
+   <port name="start" direction="input" role="start" width="1" />
+   <port name="done" direction="output" role="done" width="1" />
+   <port name="result" direction="output" role="result" width="32" />
+  </interface>
+ </perimeter>
+ <entity
+   path=""
+   parameterizationKey="FPU:1.0:AUTO_DEVICE=5CEBA2F17A7,AUTO_DEVICE_FAMILY=Cyclone V,AUTO_DEVICE_SPEEDGRADE=7,AUTO_GENERATION_ID=1779379374,AUTO_UNIQUE_ID=(altera_nios_custom_instr_floating_point_2_multi:25.1:arithmetic_present=1,conversion_present=1,deviceFamily=Cyclone V,root_present=1)"
+   instancePathKey="FPU"
+   kind="FPU"
+   version="1.0"
+   name="FPU">
+  <parameter name="AUTO_GENERATION_ID" value="1779379374" />
+  <parameter name="AUTO_DEVICE" value="5CEBA2F17A7" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone V" />
+  <parameter name="AUTO_UNIQUE_ID" value="" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="7" />
+  <generatedFiles>
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/FPU.v"
+       type="VERILOG" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/fpoint2_multi.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/fpoint2_multi_datapath.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/fpoint2_multi_dspba_library_package.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/fpoint2_multi_dspba_library.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPAddSub/FPAddSub.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPDiv/FPDiv.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPMult/FPMult.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/IntToFloat/IntToFloat.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FloatToInt/FloatToInt.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPSqrt/FPSqrt_safe_path.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPSqrt/FPSqrt.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPSqrt/FPSqrt_memoryC0_uid59_sqrtTableGenerator_lutmem.hex"
+       type="HEX"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPSqrt/FPSqrt_memoryC1_uid60_sqrtTableGenerator_lutmem.hex"
+       type="HEX"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPSqrt/FPSqrt_memoryC2_uid61_sqrtTableGenerator_lutmem.hex"
+       type="HEX"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU.qsys" />
+  </sourceFiles>
+  <childSourceFiles>
+   <file
+       path="C:/altera_lite/25.1std/ip/altera/altera_nios_custom_instr_floating_point_2/altera_nios_custom_instr_floating_point_2_multi/fpoint2_multi_qsys_hw.tcl" />
+  </childSourceFiles>
+  <messages>
+   <message level="Debug" culprit="FPU">queue size: 0 starting:FPU "FPU"</message>
+   <message level="Progress" culprit="min"></message>
+   <message level="Progress" culprit="max"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Debug">Transform: CustomInstructionTransform</message>
+   <message level="Debug">No custom instruction connections, skipping transform </message>
+   <message level="Debug" culprit="merlin_custom_instruction_transform"><![CDATA[After transform: <b>1</b> modules, <b>0</b> connections]]></message>
+   <message level="Debug">Transform: MMTransform</message>
+   <message level="Debug">Transform: InterruptMapperTransform</message>
+   <message level="Debug">Transform: InterruptSyncTransform</message>
+   <message level="Debug">Transform: InterruptFanoutTransform</message>
+   <message level="Debug">Transform: AvalonStreamingTransform</message>
+   <message level="Debug">Transform: ResetAdaptation</message>
+   <message level="Debug" culprit="FPU"><![CDATA["<b>FPU</b>" reuses <b>altera_nios_custom_instr_floating_point_2_multi</b> "<b>submodules/fpoint2_multi</b>"]]></message>
+   <message level="Debug" culprit="FPU">queue size: 0 starting:altera_nios_custom_instr_floating_point_2_multi "submodules/fpoint2_multi"</message>
+   <message level="Info" culprit="nios_custom_instr_floating_point_2_multi_0"><![CDATA["<b>FPU</b>" instantiated <b>altera_nios_custom_instr_floating_point_2_multi</b> "<b>nios_custom_instr_floating_point_2_multi_0</b>"]]></message>
+  </messages>
+ </entity>
+ <entity
+   path="submodules/"
+   parameterizationKey="altera_nios_custom_instr_floating_point_2_multi:25.1:arithmetic_present=1,conversion_present=1,deviceFamily=Cyclone V,root_present=1"
+   instancePathKey="FPU:.:nios_custom_instr_floating_point_2_multi_0"
+   kind="altera_nios_custom_instr_floating_point_2_multi"
+   version="25.1"
+   name="fpoint2_multi">
+  <parameter name="arithmetic_present" value="1" />
+  <parameter name="root_present" value="1" />
+  <parameter name="deviceFamily" value="Cyclone V" />
+  <parameter name="conversion_present" value="1" />
+  <generatedFiles>
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/fpoint2_multi.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/fpoint2_multi_datapath.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/fpoint2_multi_dspba_library_package.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/fpoint2_multi_dspba_library.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPAddSub/FPAddSub.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPDiv/FPDiv.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPMult/FPMult.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/IntToFloat/IntToFloat.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FloatToInt/FloatToInt.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPSqrt/FPSqrt_safe_path.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPSqrt/FPSqrt.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPSqrt/FPSqrt_memoryC0_uid59_sqrtTableGenerator_lutmem.hex"
+       type="HEX"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPSqrt/FPSqrt_memoryC1_uid60_sqrtTableGenerator_lutmem.hex"
+       type="HEX"
+       attributes="" />
+   <file
+       path="C:/Users/jtori/source/repos/E5_TP1/Quartus/FPU/synthesis/submodules/FPSqrt/FPSqrt_memoryC2_uid61_sqrtTableGenerator_lutmem.hex"
+       type="HEX"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles/>
+  <sourceFiles>
+   <file
+       path="C:/altera_lite/25.1std/ip/altera/altera_nios_custom_instr_floating_point_2/altera_nios_custom_instr_floating_point_2_multi/fpoint2_multi_qsys_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator instantiator="FPU" as="nios_custom_instr_floating_point_2_multi_0" />
+  <messages>
+   <message level="Debug" culprit="FPU">queue size: 0 starting:altera_nios_custom_instr_floating_point_2_multi "submodules/fpoint2_multi"</message>
+   <message level="Info" culprit="nios_custom_instr_floating_point_2_multi_0"><![CDATA["<b>FPU</b>" instantiated <b>altera_nios_custom_instr_floating_point_2_multi</b> "<b>nios_custom_instr_floating_point_2_multi_0</b>"]]></message>
+  </messages>
+ </entity>
+</deploy>
