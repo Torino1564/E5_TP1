@@ -16,9 +16,9 @@ module cpu_tb;
 		#20 n_rst = 1;
 	end
 	
-	cpu cpu_inst (
-		.clk(clk),
-		.n_rst(n_rst)
+	cpu #(.SIMULATION(1)) cpu_inst (
+		.clk_in(clk),
+		.n_rst_in(n_rst)
 	);
 
 endmodule

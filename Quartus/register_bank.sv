@@ -2,7 +2,8 @@ module register_bank
 #(
 	parameter NUM_REGISTERS = 32,
 	parameter WSIZE = 32,
-	parameter ADD_BUS_WIDTH = $clog2(NUM_REGISTERS)
+	parameter ADD_BUS_WIDTH = $clog2(NUM_REGISTERS),
+	parameter TEST_REGISTER_NUM = 10
 )(
 	// Clk
 	input wire clk,
@@ -23,7 +24,10 @@ module register_bank
 	input wire [WSIZE-1:0] imm,
 	
 	// Instruction flags
-	input wire inst_write_rd
+	input wire inst_write_rd,
+	
+	// Test register
+	output logic [WSIZE-1:0] test_register
 );
 	// register bank
 	reg [WSIZE-1:0] registers [NUM_REGISTERS] = '{default: '0};
@@ -52,4 +56,7 @@ module register_bank
 				registers[rd] <= rddata;
 		end
 	end
+	
+	assign test_register = registers[TEST_REGISTER_NUM];
+	
 endmodule

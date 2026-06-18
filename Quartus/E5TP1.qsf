@@ -42,7 +42,7 @@ set_global_assignment -name DEVICE 5CSEBA6U23I7
 set_global_assignment -name TOP_LEVEL_ENTITY cpu
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 25.1STD.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "21:06:26  MARCH 26, 2026"
-set_global_assignment -name LAST_QUARTUS_VERSION "25.1std.0 SP0.01std Lite Edition"
+set_global_assignment -name LAST_QUARTUS_VERSION "25.1std.0 Lite Edition"
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP "-40"
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 100
@@ -108,7 +108,6 @@ set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME fp_alu_tb -section_id fp_
 set_global_assignment -name SYSTEMVERILOG_FILE fp_alu_tb.sv
 set_global_assignment -name SYSTEMVERILOG_FILE fp_ops.sv
 set_global_assignment -name QIP_FILE fpu/fpu.qip
-set_global_assignment -name QIP_FILE pll.qip
 set_global_assignment -name SYSTEMVERILOG_FILE mmi.sv
 set_global_assignment -name HEX_FILE program.hex
 set_global_assignment -name SYSTEMVERILOG_FILE addrBuilder_tb.sv
@@ -149,4 +148,16 @@ set_global_assignment -name EDA_TEST_BENCH_FILE operand_builder_tb.sv -section_i
 set_global_assignment -name EDA_TEST_BENCH_FILE cpu_tb.sv -section_id cpu_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE mmi_tb.sv -section_id mmi_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE fp_alu_tb.sv -section_id fp_alu_tb
+set_global_assignment -name QIP_FILE pll.qip
+set_global_assignment -name SIP_FILE pll.sip
+set_location_assignment PIN_W15 -to leds[0]
+set_location_assignment PIN_AA24 -to leds[1]
+set_location_assignment PIN_V16 -to leds[2]
+set_location_assignment PIN_V15 -to leds[3]
+set_location_assignment PIN_AF26 -to leds[4]
+set_location_assignment PIN_AE26 -to leds[5]
+set_location_assignment PIN_Y16 -to leds[6]
+set_location_assignment PIN_AA23 -to leds[7]
+set_location_assignment PIN_AH17 -to n_rst_in
+set_location_assignment PIN_V11 -to clk_in
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

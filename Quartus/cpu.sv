@@ -2,12 +2,37 @@ import opcodes::*;
 import memory_sections::*;
 import stage::*;
 
-module cpu (
-	input wire clk,
-	input wire n_rst,
+module cpu #(
+	parameter SIMULATION = 0
+) (
+	input wire clk_in,
+	input wire n_rst_in,
 	
-	output [31:0] outbusA
+	output logic [7:0] leds
 );
+
+	wire clk;
+	wire n_rst;
+	wire pll_locked;
+	wire out_clk_pll;
+	
+	generate
+		if (SIMULATION == 0) begin
+			assign n_rst = n_rst_in & pll_locked;
+			assign clk = out_clk_pll;
+			
+			pll pll_inst (
+				.refclk(clk_in),
+				.rst(n_rst),
+				.outclk_0(out_clk_pll),
+				.locked(pll_locked)
+			);
+		end
+		else begin
+			assign n_rst = n_rst_in;
+			assign clk = clk_in;
+		end
+	endgenerate
 	
 	// Instruction Decode
 	wire  [31:0] next_pc;
@@ -191,7 +216,29 @@ module cpu (
 	
 	assign rddata = pipeline[EXECUTION_STAGE].inst_write_pc_jal ? jal_return_address : alu_result;
 	
-	register_bank register_bank
+	wire [31:0] test_register;
+	
+	//assign leds = test_register[7:0];
+	//assign leds = 8'b10100101;
+	
+	logic [25:0] counter;
+	
+	always_ff @(posedge clk_in) begin
+		if (!n_rst) begin
+			leds <= 'b0;
+			counter <= 'b0;
+		end
+		else if (counter >= 26'b10000000) begin
+			leds[7] <= !leds[7];
+			counter <= 'b0;
+		end
+		else begin
+			counter <= counter + 26'b1;
+			leds[0] <= !leds[0];
+		end
+	end
+	
+	register_bank #(.TEST_REGISTER_NUM(28)) register_bank
 	(
 		.clk(clk) ,	// input  clk
 		.n_rst(n_rst) ,	// input  n_rst
@@ -203,7 +250,8 @@ module cpu (
 		.rd(pipeline[WRITEBACK_STAGE].rd) ,	// input [(ADD_BUS_WIDTH-1):0] rd
 		.rddata(pipeline[WRITEBACK_STAGE].rddata) ,	// input [(WSIZE-1):0] rddata
 		.imm(pipeline[EXECUTION_STAGE].imm) ,	// input [(WSIZE-1):0] imm
-		.inst_write_rd(pipeline[WRITEBACK_STAGE].inst_write_rd) 	// input  inst_write_rd
+		.inst_write_rd(pipeline[WRITEBACK_STAGE].inst_write_rd), 	// input  inst_write_rd
+		.test_register(test_register)
 	);
 	
 	// Op builder
