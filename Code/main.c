@@ -1,12 +1,26 @@
-static const int VALUE = 0xFEEDBEEF;
-static const int ADDRESS = 0x10000100;
+unsigned int fibo(unsigned int iterations);
+
 int main()
 {
-    int* p = (int*)ADDRESS;
+    return fibo(10);
+}
+
+unsigned int fibo(unsigned int iterations)
+{
+    unsigned int n1;
+    unsigned int n2;
+    unsigned res = 0;
+    
+    n1 = 1;
+    n2 = 1;
+    
 	
-    *p = VALUE;
-	
-    int b = *p;
-	
-    return b;
+    for (unsigned int i = 0; i < iterations; i++)
+    {
+        res = n1 + n2;
+        n2 = n1;
+        n1 = res;
+    }
+
+    return res;
 }
