@@ -6,7 +6,7 @@ module cpu_tb;
 	reg n_rst;
 	
 	always begin
-		#5 clk = ~clk;
+		#10 clk = ~clk;
 	end
 	
 	initial begin
@@ -14,9 +14,13 @@ module cpu_tb;
 		n_rst = 0;
 		
 		#20 n_rst = 1;
+		
+		
+		#1100 n_rst = 0;
+		#40 n_rst = 1;
 	end
 	
-	cpu #(.SIMULATION(1)) cpu_inst (
+	cpu cpu_inst (
 		.clk_in(clk),
 		.n_rst_in(n_rst)
 	);

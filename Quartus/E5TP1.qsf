@@ -42,7 +42,7 @@ set_global_assignment -name DEVICE 5CSEBA6U23I7
 set_global_assignment -name TOP_LEVEL_ENTITY cpu
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 25.1STD.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "21:06:26  MARCH 26, 2026"
-set_global_assignment -name LAST_QUARTUS_VERSION "25.1std.0 Lite Edition"
+set_global_assignment -name LAST_QUARTUS_VERSION "25.1std.0 SP0.01std Lite Edition"
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP "-40"
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 100
@@ -137,7 +137,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE stage.sv
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
-set_instance_assignment -name VIRTUAL_PIN ON -to "register_bank:register_bank|registers[15][0]"
 set_global_assignment -name EDA_TEST_BENCH_FILE decoder_tb.sv -section_id decoder_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE ALU_tb.sv -section_id ALU_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE register_bank_tb.sv -section_id register_bank_tb
@@ -160,4 +159,14 @@ set_location_assignment PIN_Y16 -to leds[6]
 set_location_assignment PIN_AA23 -to leds[7]
 set_location_assignment PIN_AH17 -to n_rst_in
 set_location_assignment PIN_V11 -to clk_in
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to clk_in
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to leds[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to leds[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to leds[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to leds[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to leds[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to leds[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to leds[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to leds[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to n_rst_in
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

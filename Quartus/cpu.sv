@@ -2,15 +2,13 @@ import opcodes::*;
 import memory_sections::*;
 import stage::*;
 
-module cpu #(
-	parameter SIMULATION = 0
-) (
+module cpu (
 	input wire clk_in,
 	input wire n_rst_in,
 	
 	output logic [7:0] leds
 );
-
+	localparam SIMULATION = 0;
 	wire clk;
 	wire n_rst;
 	wire pll_locked;
@@ -23,7 +21,7 @@ module cpu #(
 			
 			pll pll_inst (
 				.refclk(clk_in),
-				.rst(n_rst),
+				.rst(!n_rst_in),
 				.outclk_0(out_clk_pll),
 				.locked(pll_locked)
 			);
@@ -218,25 +216,14 @@ module cpu #(
 	
 	wire [31:0] test_register;
 	
-	//assign leds = test_register[7:0];
-	//assign leds = 8'b10100101;
+	assign leds[6:0] = test_register[6:0];
 	
-	logic [25:0] counter;
+	logic [31:0] counter;
 	
-	always_ff @(posedge clk_in) begin
-		if (!n_rst) begin
-			leds <= 'b0;
-			counter <= 'b0;
-		end
-		else if (counter >= 26'b10000000) begin
-			leds[7] <= !leds[7];
-			counter <= 'b0;
-		end
-		else begin
-			counter <= counter + 26'b1;
-			leds[0] <= !leds[0];
-		end
-	end
+	always_ff @(posedge clk)
+		counter <= counter + 1;
+		
+	assign leds[7] = counter[25];
 	
 	register_bank #(.TEST_REGISTER_NUM(28)) register_bank
 	(
