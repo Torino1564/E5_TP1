@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simPackage>
+ <file path="fi2f_sim/fi2f.vo" type="VERILOG" />
+ <topLevel name="fi2f" />
+ <deviceFamily name="cyclonev" />
+</simPackage>

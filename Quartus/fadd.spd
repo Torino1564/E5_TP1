@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simPackage>
+ <file path="fadd_sim/fadd.vo" type="VERILOG" />
+ <topLevel name="fadd" />
+ <deviceFamily name="cyclonev" />
+</simPackage>

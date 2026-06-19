@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simPackage>
+ <file path="feq_sim/feq.vo" type="VERILOG" />
+ <topLevel name="feq" />
+ <deviceFamily name="cyclonev" />
+</simPackage>

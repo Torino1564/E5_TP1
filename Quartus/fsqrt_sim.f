@@ -1,0 +1,4 @@
+fsqrt_sim/fsqrt_memoryC0_uid62_sqrtTables_lutmem.hex
+fsqrt_sim/fsqrt_memoryC1_uid65_sqrtTables_lutmem.hex
+fsqrt_sim/fsqrt_memoryC2_uid68_sqrtTables_lutmem.hex
+fsqrt_sim/fsqrt.vo

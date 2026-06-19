@@ -1,0 +1,223 @@
+//IP Functional Simulation Model
+//VERSION_BEGIN 25.1 cbx_mgl 2025:10:22:10:31:44:SC cbx_simgen 2025:10:22:10:31:26:SC  VERSION_END
+// synthesis VERILOG_INPUT_VERSION VERILOG_2001
+// altera message_off 10463
+
+
+
+// Copyright (C) 2025  Altera Corporation. All rights reserved.
+// Your use of Altera Corporation's design tools, logic functions 
+// and other software and tools, and any partner logic 
+// functions, and any output files from any of the foregoing 
+// (including device programming or simulation files), and any 
+// associated documentation or information are expressly subject 
+// to the terms and conditions of the Altera Program License 
+// Subscription Agreement, the Altera Quartus Prime License Agreement,
+// the Altera IP License Agreement, or other applicable license
+// agreement, including, without limitation, that your use is for
+// the sole purpose of programming logic devices manufactured by
+// Altera and sold by Altera or its authorized distributors.  Please
+// refer to the Altera Software License Subscription Agreements 
+// on the Quartus Prime software download page.
+
+// You may only use these simulation model output files for simulation
+// purposes and expressly not for synthesis or any other purposes (in which
+// event Intel disclaims all warranties of any kind).
+
+
+//synopsys translate_off
+
+//synthesis_resources = lut 5 mux21 2 oper_add 2 
+`timescale 1 ps / 1 ps
+module  fle
+	( 
+	a,
+	areset,
+	b,
+	clk,
+	en,
+	q) /* synthesis synthesis_clearbox=1 */;
+	input   [31:0]  a;
+	input   areset;
+	input   [31:0]  b;
+	input   clk;
+	input   [0:0]  en;
+	output   [0:0]  q;
+
+	reg	n00l;
+	reg	nl1lO;
+	reg	nl1Oi;
+	reg	nl1Ol;
+	reg	nl1OO;
+	wire	wire_n00i_ENA;
+	wire	wire_n01i_dataout;
+	wire	wire_n0ll_dataout;
+	wire  [33:0]   wire_n0lO_o;
+	wire  [33:0]   wire_n0Oi_o;
+	wire  nii0i;
+	wire  nii0l;
+	wire  nii0O;
+	wire  nii1l;
+	wire  nii1O;
+	wire  niiii;
+	wire  niiil;
+	wire  niiiO;
+	wire  niili;
+	wire  niill;
+	wire  niilO;
+	wire  niiOi;
+	wire  niiOl;
+	wire  niiOO;
+	wire  nil0i;
+	wire  nil0l;
+	wire  nil0O;
+	wire  nil1i;
+	wire  nil1l;
+	wire  nil1O;
+	wire  nilii;
+	wire  nilil;
+	wire  niliO;
+	wire  nilli;
+	wire  nilll;
+	wire  nillO;
+	wire  nilOi;
+	wire  nilOl;
+	wire  nilOO;
+	wire  niO0i;
+	wire  niO0l;
+	wire  niO0O;
+	wire  niO1i;
+	wire  niO1l;
+	wire  niO1O;
+	wire  niOii;
+	wire  niOil;
+	wire  niOiO;
+	wire  niOli;
+	wire  niOll;
+	wire  niOlO;
+	wire  niOOi;
+	wire  niOOl;
+	wire  niOOO;
+	wire  nl10i;
+	wire  nl10l;
+	wire  nl10O;
+	wire  nl11i;
+	wire  nl11l;
+	wire  nl11O;
+	wire  nl1ii;
+	wire  nl1il;
+	wire  nl1ll;
+
+	initial
+	begin
+		n00l = 0;
+		nl1lO = 0;
+		nl1Oi = 0;
+		nl1Ol = 0;
+		nl1OO = 0;
+	end
+	always @ ( posedge clk or  posedge areset)
+	begin
+		if (areset == 1'b1) 
+		begin
+			n00l <= 0;
+			nl1lO <= 0;
+			nl1Oi <= 0;
+			nl1Ol <= 0;
+			nl1OO <= 0;
+		end
+		else if  (wire_n00i_ENA == 1'b1) 
+		begin
+			n00l <= wire_n0ll_dataout;
+			nl1lO <= (nl1ll & nilOO);
+			nl1Oi <= a[31];
+			nl1Ol <= b[31];
+			nl1OO <= (((~ nii0l) & nii0i) | ((~ nii1O) & nii1l));
+		end
+	end
+	assign
+		wire_n00i_ENA = en[0];
+	and(wire_n01i_dataout, ((((~ (nl1Oi ^ nl1Ol)) & n00l) | (nl1Oi & (~ nl1Ol))) | nl1lO), (~ nl1OO));
+	assign		wire_n0ll_dataout = (a[31] === 1'b1) ? (~ wire_n0Oi_o[33]) : (~ wire_n0lO_o[33]);
+	oper_add   n0lO
+	( 
+	.a({{2{1'b0}}, b[30:23], niO1i, niO1l, niO1O, niO0i, niO0l, niO0O, niOii, niOil, niOiO, niOli, niOll, niOlO, niOOi, niOOl, niOOO, nl11i, nl11l, nl11O, nl10i, nl10l, nl10O, nl1ii, nl1il, 1'b1}),
+	.b({{2{1'b1}}, (~ a[30]), (~ a[29]), (~ a[28]), (~ a[27]), (~ a[26]), (~ a[25]), (~ a[24]), (~ a[23]), (~ niiii), (~ niiil), (~ niiiO), (~ niili), (~ niill), (~ niilO), (~ niiOi), (~ niiOl), (~ niiOO), (~ nil1i), (~ nil1l), (~ nil1O), (~ nil0i), (~ nil0l), (~ nil0O), (~ nilii), (~ nilil), (~ niliO), (~ nilli), (~ nilll), (~ nillO), (~ nilOi), (~ nilOl), 1'b1}),
+	.cin(1'b0),
+	.cout(),
+	.o(wire_n0lO_o));
+	defparam
+		n0lO.sgate_representation = 0,
+		n0lO.width_a = 34,
+		n0lO.width_b = 34,
+		n0lO.width_o = 34;
+	oper_add   n0Oi
+	( 
+	.a({{2{1'b0}}, a[30:23], niiii, niiil, niiiO, niili, niill, niilO, niiOi, niiOl, niiOO, nil1i, nil1l, nil1O, nil0i, nil0l, nil0O, nilii, nilil, niliO, nilli, nilll, nillO, nilOi, nilOl, 1'b1}),
+	.b({{2{1'b1}}, (~ b[30]), (~ b[29]), (~ b[28]), (~ b[27]), (~ b[26]), (~ b[25]), (~ b[24]), (~ b[23]), (~ niO1i), (~ niO1l), (~ niO1O), (~ niO0i), (~ niO0l), (~ niO0O), (~ niOii), (~ niOil), (~ niOiO), (~ niOli), (~ niOll), (~ niOlO), (~ niOOi), (~ niOOl), (~ niOOO), (~ nl11i), (~ nl11l), (~ nl11O), (~ nl10i), (~ nl10l), (~ nl10O), (~ nl1ii), (~ nl1il), 1'b1}),
+	.cin(1'b0),
+	.cout(),
+	.o(wire_n0Oi_o));
+	defparam
+		n0Oi.sgate_representation = 0,
+		n0Oi.width_a = 34,
+		n0Oi.width_b = 34,
+		n0Oi.width_o = 34;
+	assign
+		nii0i = (((((((b[23] & b[24]) & b[25]) & b[26]) & b[27]) & b[28]) & b[29]) & b[30]),
+		nii0l = (((((((((((((((((((((((~ b[0]) & (~ b[1])) & (~ b[2])) & (~ b[3])) & (~ b[4])) & (~ b[5])) & (~ b[6])) & (~ b[7])) & (~ b[8])) & (~ b[9])) & (~ b[10])) & (~ b[11])) & (~ b[12])) & (~ b[13])) & (~ b[14])) & (~ b[15])) & (~ b[16])) & (~ b[17])) & (~ b[18])) & (~ b[19])) & (~ b[20])) & (~ b[21])) & (~ b[22])),
+		nii0O = 1'b1,
+		nii1l = (((((((a[23] & a[24]) & a[25]) & a[26]) & a[27]) & a[28]) & a[29]) & a[30]),
+		nii1O = (((((((((((((((((((((((~ a[0]) & (~ a[1])) & (~ a[2])) & (~ a[3])) & (~ a[4])) & (~ a[5])) & (~ a[6])) & (~ a[7])) & (~ a[8])) & (~ a[9])) & (~ a[10])) & (~ a[11])) & (~ a[12])) & (~ a[13])) & (~ a[14])) & (~ a[15])) & (~ a[16])) & (~ a[17])) & (~ a[18])) & (~ a[19])) & (~ a[20])) & (~ a[21])) & (~ a[22])),
+		niiii = (a[22] & (~ nilOO)),
+		niiil = (a[21] & (~ nilOO)),
+		niiiO = (a[20] & (~ nilOO)),
+		niili = (a[19] & (~ nilOO)),
+		niill = (a[18] & (~ nilOO)),
+		niilO = (a[17] & (~ nilOO)),
+		niiOi = (a[16] & (~ nilOO)),
+		niiOl = (a[15] & (~ nilOO)),
+		niiOO = (a[14] & (~ nilOO)),
+		nil0i = (a[10] & (~ nilOO)),
+		nil0l = (a[9] & (~ nilOO)),
+		nil0O = (a[8] & (~ nilOO)),
+		nil1i = (a[13] & (~ nilOO)),
+		nil1l = (a[12] & (~ nilOO)),
+		nil1O = (a[11] & (~ nilOO)),
+		nilii = (a[7] & (~ nilOO)),
+		nilil = (a[6] & (~ nilOO)),
+		niliO = (a[5] & (~ nilOO)),
+		nilli = (a[4] & (~ nilOO)),
+		nilll = (a[3] & (~ nilOO)),
+		nillO = (a[2] & (~ nilOO)),
+		nilOi = (a[1] & (~ nilOO)),
+		nilOl = (a[0] & (~ nilOO)),
+		nilOO = ((((((((~ a[23]) & (~ a[24])) & (~ a[25])) & (~ a[26])) & (~ a[27])) & (~ a[28])) & (~ a[29])) & (~ a[30])),
+		niO0i = (b[19] & (~ nl1ll)),
+		niO0l = (b[18] & (~ nl1ll)),
+		niO0O = (b[17] & (~ nl1ll)),
+		niO1i = (b[22] & (~ nl1ll)),
+		niO1l = (b[21] & (~ nl1ll)),
+		niO1O = (b[20] & (~ nl1ll)),
+		niOii = (b[16] & (~ nl1ll)),
+		niOil = (b[15] & (~ nl1ll)),
+		niOiO = (b[14] & (~ nl1ll)),
+		niOli = (b[13] & (~ nl1ll)),
+		niOll = (b[12] & (~ nl1ll)),
+		niOlO = (b[11] & (~ nl1ll)),
+		niOOi = (b[10] & (~ nl1ll)),
+		niOOl = (b[9] & (~ nl1ll)),
+		niOOO = (b[8] & (~ nl1ll)),
+		nl10i = (b[4] & (~ nl1ll)),
+		nl10l = (b[3] & (~ nl1ll)),
+		nl10O = (b[2] & (~ nl1ll)),
+		nl11i = (b[7] & (~ nl1ll)),
+		nl11l = (b[6] & (~ nl1ll)),
+		nl11O = (b[5] & (~ nl1ll)),
+		nl1ii = (b[1] & (~ nl1ll)),
+		nl1il = (b[0] & (~ nl1ll)),
+		nl1ll = ((((((((~ b[23]) & (~ b[24])) & (~ b[25])) & (~ b[26])) & (~ b[27])) & (~ b[28])) & (~ b[29])) & (~ b[30])),
+		q = {wire_n01i_dataout};
+endmodule //fle
+//synopsys translate_on
+//VALID FILE

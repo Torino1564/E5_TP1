@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simPackage>
+ <file path="ff2i_sim/ff2i.vo" type="VERILOG" />
+ <topLevel name="ff2i" />
+ <deviceFamily name="cyclonev" />
+</simPackage>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simPackage>
+ <file
+   path="fsqrt_sim/fsqrt_memoryC0_uid62_sqrtTables_lutmem.hex"
+   type="HEX" />
+ <file
+   path="fsqrt_sim/fsqrt_memoryC1_uid65_sqrtTables_lutmem.hex"
+   type="HEX" />
+ <file
+   path="fsqrt_sim/fsqrt_memoryC2_uid68_sqrtTables_lutmem.hex"
+   type="HEX" />
+ <file path="fsqrt_sim/fsqrt.vo" type="VERILOG" />
+ <topLevel name="fsqrt" />
+ <deviceFamily name="cyclonev" />
+</simPackage>

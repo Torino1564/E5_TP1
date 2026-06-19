@@ -1,75 +1,94 @@
 `timescale 1ns/1ps
+`define F(x) $shortrealtobits(x)
 
 import fp_ops::*;
 
 module fp_alu_tb;
 
-    logic [31:0] a, b, result;
-    logic a_stb, b_stb;
-    logic result_stb;
-    logic a_ack, b_ack;
-    logic result_ack;
-    logic clk, reset;
-	
-	 FP_OPS op;
-	
-    fp_alu fp_alu_inst(
+    logic        clk;
+    logic        start;
+    logic [31:0] a;
+    logic [31:0] b;
+    FP_OPS  op;
+    logic [31:0] result;
+
+    fp_alu dut (
+        .clk(clk),
+        .start(start),
         .a(a),
         .b(b),
-        .a_stb(a_stb),
-        .b_stb(b_stb),
-        .result_ack(result_ack),
-        .clk(clk),
-        .reset(reset),
-		  .op(op),
-        .result(result),
-        .result_stb(result_stb),
-        .a_ack(a_ack),
-        .b_ack(b_ack)
+        .op(op),
+        .result(result)
     );
 
-    always #5 clk = ~clk;
+    //---------------------------------------------------------
+    // Clock
+    //---------------------------------------------------------
 
     initial begin
-        clk        = 0;
-        reset      = 1;
+        clk = 0;
+        forever #10 clk = ~clk;
+    end
 
-        a          = 0;
-        b          = 0;
-        a_stb      = 0;
-        b_stb      = 0;
-        result_ack = 0;
-		  op = FDIV;
-		  
-        // Reset
-        #20;
-        reset = 0;
+    //---------------------------------------------------------
+    // Helper task
+    //---------------------------------------------------------
 
-        @(posedge clk);
+    task execute(
+        input logic [3:0] op_i,
+        input logic [31:0] a_i,
+        input logic [31:0] b_i
+    );
+    begin
+        @(negedge clk);
 
-        // 1.0 + 2.0 = 3.0
-        a = $shortrealtobits(672.4);
-        b = $shortrealtobits(47.5);
+        op    = op_i;
+        a     = a_i;
+        b     = b_i;
+        start = 1'b1;
 
-        a_stb = 1;
-        b_stb = 1;
+        // Adjust according to IP latency
+        repeat (20) @(posedge clk);
+		  start = 1'b0;
+        $display(
+				 "t=%0t op=%0d a=%f b=%f result=%f",
+				 $time,
+				 op_i,
+				 $bitstoshortreal(a_i),
+				 $bitstoshortreal(b_i),
+				 $bitstoshortreal(result)
+			);
+    end
+    endtask
 
-        // Wait until the adder accepts both operands
-        wait (a_ack && b_ack);
+    //---------------------------------------------------------
+    // Tests
+    //---------------------------------------------------------
+	
+    initial begin
 
-        @(posedge clk);
-        a_stb = 0;
-        b_stb = 0;
+         start = 0;
+         op    = 0;
+         a     = 0;
+         b     = 0;
 
-        // Wait for result
-        wait (result_stb);
+         repeat(5) @(posedge clk);
 
-        result_ack = 1;
-        @(posedge clk);
-        result_ack = 0;
+         execute(FP_ADD , `F(1.5),  `F(2.5));
+			execute(FP_SUB , `F(2.5),  `F(1.5));
+			execute(FP_MUL , `F(2.0),  `F(4.0));
+			execute(FP_DIV , `F(8.0),  `F(2.0));
+			execute(FP_SQRT, `F(16.0), 32'h0);
+			execute(FP_MAX , `F(2.0),  `F(4.0));
+			execute(FP_MIN , `F(2.0),  `F(4.0));
+			execute(FP_EQ  , `F(2.0),  `F(2.0));
+			execute(FP_LT  , `F(2.0),  `F(4.0));
+			execute(FP_LE  , `F(4.0),  `F(4.0));
+			execute(FP_LT  , `F(4.0),  `F(4.0));
 
-        #100;
-        $finish;
+         #200;
+         $stop;
+
     end
 
 endmodule

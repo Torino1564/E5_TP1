@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simPackage>
+ <file path="fmadd_sim/fmadd.vo" type="VERILOG" />
+ <topLevel name="fmadd" />
+ <deviceFamily name="cyclonev" />
+</simPackage>
