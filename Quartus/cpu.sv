@@ -14,9 +14,18 @@ module cpu (
 	wire pll_locked;
 	wire out_clk_pll;
 	
+	logic pll_locked_delayed;
+	
+	always_ff @(posedge clk_in) begin
+		if (!n_rst_in)
+			pll_locked_delayed <= 'b0;
+		else
+			pll_locked_delayed <= pll_locked;
+	end
+	
 	generate
 		if (SIMULATION == 0) begin
-			assign n_rst = n_rst_in & pll_locked;
+			assign n_rst = n_rst_in & pll_locked_delayed;
 			assign clk = out_clk_pll;
 			
 			pll pll_inst (

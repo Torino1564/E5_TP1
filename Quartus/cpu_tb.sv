@@ -14,10 +14,6 @@ module cpu_tb;
 		n_rst = 0;
 		
 		#20 n_rst = 1;
-		
-		
-		#1100 n_rst = 0;
-		#40 n_rst = 1;
 	end
 	
 	cpu cpu_inst (
