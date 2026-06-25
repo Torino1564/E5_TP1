@@ -33,7 +33,10 @@ module fp_alu_tb;
     //---------------------------------------------------------
     // Helper task
     //---------------------------------------------------------
-
+	
+	
+	 FP_LAT latency;
+	
     task execute(
         input logic [3:0] op_i,
         input logic [31:0] a_i,
@@ -46,17 +49,19 @@ module fp_alu_tb;
         a     = a_i;
         b     = b_i;
         start = 1'b1;
+		  assign latency = FP_LATENCY[op_i];
 
         // Adjust according to IP latency
-        repeat (20) @(posedge clk);
+        repeat (latency+1) @(posedge clk);
 		  start = 1'b0;
         $display(
-				 "t=%0t op=%0d a=%f b=%f result=%f",
+				 "t=%0t op=%0d a=%f b=%f result=%f latency=%0d",
 				 $time,
 				 op_i,
 				 $bitstoshortreal(a_i),
 				 $bitstoshortreal(b_i),
-				 $bitstoshortreal(result)
+				 $bitstoshortreal(result),
+				 latency
 			);
     end
     endtask

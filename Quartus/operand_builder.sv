@@ -6,6 +6,8 @@ module operand_builder (
 
 	input wire [31:0] rs1data,
 	input wire [31:0] rs2data,
+	input wire [31:0] fprs1data,
+	input wire [31:0] fprs2data,
 	input wire [31:0] imm,
 	input wire [31:0] pc,
 	
@@ -18,6 +20,7 @@ module operand_builder (
 	output reg [31:0] B,
 	
 	output reg [6:0] op,
+	output reg [6:0] op_fp,
 	
 	output wire [31:0] jal_return_address,
 	output reg branch_condition
@@ -81,12 +84,18 @@ module operand_builder (
 					B = imm;
 					op = ADD;
 				end
-				LOAD, STORE: begin
+				LOAD, STORE, LOAD_FP, STORE_FP: begin
 					A = rs1data;
 					B = imm;
 					op = ADD;
 				end
+				OP_FP: begin
+					A = fprs1data;
+					B = fprs2data;
+					D
+				end
 				default: begin
+				
 				end
 			endcase
 		end

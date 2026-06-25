@@ -241,11 +241,28 @@ module cpu (
 		.test_register(test_register)
 	);
 	
+	fp_register_bank register_bank
+	(
+		.clk(clk) ,	// input  clk
+		.n_rst(n_rst) ,	// input  n_rst
+		.ena(pipeline[WRITEBACK_STAGE].valid),
+		.rs1(pipeline[EXECUTION_STAGE].fprs1) ,	// input [(ADD_BUS_WIDTH-1):0]
+		.rs2(pipeline[EXECUTION_STAGE].fprs2) ,	// input [(ADD_BUS_WIDTH-1):0]
+		.rs1data(fprs1data),	// output [(WSIZE-1):0]
+		.rs2data(fprs2data),	// output [(WSIZE-1):0]
+		.rd(pipeline[WRITEBACK_STAGE].rd) ,	// input [(ADD_BUS_WIDTH-1):0] rd
+		.rddata(pipeline[WRITEBACK_STAGE].rddata) ,	// input [(WSIZE-1):0] rddata
+		.imm(pipeline[EXECUTION_STAGE].imm) ,	// input [(WSIZE-1):0] imm
+		.inst_write_rd(pipeline[WRITEBACK_STAGE].inst_write_rd), 	// input  inst_write_rd
+	);
+	
 	// Op builder
 	operand_builder operand_builder_inst (
 		.ena(pipeline[EXECUTION_STAGE].valid),
 		.rs1data(execution_ff_d.rs1data),
 		.rs2data(execution_ff_d.rs2data),
+		.fprs1data(execution_ff_d.fprs1data),
+		.fprs2data(execution_ff_d.fprs2data),
 		.imm(pipeline[EXECUTION_STAGE].imm),
 		.pc(pipeline[EXECUTION_STAGE].pc),
 		.func3(pipeline[EXECUTION_STAGE].func3),
@@ -266,6 +283,17 @@ module cpu (
 		.B(B),
 		.result(alu_result)
 	);
+	
+	fp_alu dut (
+        .clk(clk),
+        .start(fp_alu_start),
+		  .done(fp_alu_done),
+		  .ena(pipeline[EXECUTION_STAGE].valid),
+        .a(A),
+        .b(B),
+        .op(op_fp),
+        .result(fp_alu_result)
+    );
 	
 	always_comb begin
 		execution_ff_d = 'x;

@@ -6,6 +6,8 @@ package stage;
 		logic [31:0] inst;
 		logic [31:0] rs1data;
 		logic [31:0] rs2data;
+		logic [31:0] fprs1data;
+		logic [31:0] fprs2data;
 		logic [31:0] imm;
 		logic [31:0] alu_result;
 		logic [31:0] rddata;
@@ -18,6 +20,7 @@ package stage;
 		logic [6:0] opcode;
 		
 		// flags
+		logic inst_write_fp_regs;
 		logic inst_write_rd;
 		logic inst_write_pc_jal;
 		logic jal_return_address;
