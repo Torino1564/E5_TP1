@@ -9,6 +9,8 @@ module fp_alu
     input  logic [31:0] 					b,
 
     input  logic [$bits(FP_OPS)-1:0] 	op,
+	 
+	 output logic 								done,
 
     output logic [31:0] 					result
 );
@@ -220,5 +222,20 @@ module fp_alu
         endcase
 
     end
+	 
+	 FP_LAT remaining_latency = 'b0;
+	 reg prev_start = 0;
+	 
+	 always_ff @(posedge clk) begin
+			prev_start <= start;
+	 end
+	 
+	 always_ff @(posedge clk) begin
+			remaining_latency <= remaining_latency == 0 ? 0 : remaining_latency - 1;
+			if (prev_start == 1'b0 && start == 1'b1)
+				remaining_latency <= FP_LATENCY[op];
+	 end
+	 
+	 assign done = remaining_latency == 0;
 
 endmodule

@@ -13,7 +13,7 @@ package opcodes;
 			BUBBLE   =  7'b1111111,
 			LOAD_FP  =  7'b0000111,
 			STORE_FP =  7'b0100111,
-			OP_FP		=  7'b1010011,
+			OP_FP		=  7'b1010011
 	} Opcodes;
 	
 	localparam [31:0] NOP = 32'h0000000F;

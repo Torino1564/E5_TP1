@@ -2,4 +2,6 @@ Compile regular C file: riscv-none-elf-gcc -o output.elf -march=rv32i -mabi=ilp3
 
 Compile with no STD lib: riscv-none-elf-gcc -o output.elf -march=rv32i -mabi=ilp32 -T link.ld main.c bootloader-nostd.s -ffreestanding -nostartfiles -nostdlib
 
+Compile with no STD lib FLOAT: riscv-none-elf-gcc -o output.elf -march=rv32imafc -mabi=ilp32f -T link.ld main.c bootloader-nostd.s -ffreestanding -nostartfiles -nostdlib
+
 riscv-none-elf-objcopy -O ihex output.elf output.hex

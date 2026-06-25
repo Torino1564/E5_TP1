@@ -1,6 +1,7 @@
 import opcodes::*;
 import memory_sections::*;
 import stage::*;
+import fp_ops::*;
 
 module cpu (
 	input wire clk_in,
@@ -14,9 +15,18 @@ module cpu (
 	wire pll_locked;
 	wire out_clk_pll;
 	
+	logic pll_locked_delayed;
+	
+	always_ff @(posedge clk_in) begin
+		if (!n_rst_in)
+			pll_locked_delayed <= 'b0;
+		else
+			pll_locked_delayed <= pll_locked;
+	end
+	
 	generate
 		if (SIMULATION == 0) begin
-			assign n_rst = n_rst_in & pll_locked;
+			assign n_rst = n_rst_in & pll_locked_delayed;
 			assign clk = out_clk_pll;
 			
 			pll pll_inst (
@@ -98,6 +108,13 @@ module cpu (
 	wire inclock_sig, outclock_sig;
 	wire [31:0] rom_q_b_sig;
 	
+	// FPU Control
+	wire result_fp_alu;
+	wire write_fp_regs;
+	FP_OPS op_fp;
+	logic fp_alu_working;
+	wire fp_alu_done;
+	
 	// Halt Control
 	logic [NUM_STAGES-1:0] stage_enable;
 	logic [NUM_STAGES-1:0] stage_flush;
@@ -126,7 +143,9 @@ module cpu (
 		.mem_ready(mem_ready),
 		.stage_enable(stage_enable),
 		.branch_taken(inst_change_pc),
-		.stage_flush(stage_flush)
+		.stage_flush(stage_flush),
+		.fp_alu_working(fp_alu_working),
+		.fp_alu_done(fp_alu_done)
 	);
 	
 	assign inst_change_pc_ena = pipeline[EXECUTION_STAGE].opcode == BRANCH ? branch_condition : 1'b1;
@@ -237,23 +256,23 @@ module cpu (
 		.rd(pipeline[WRITEBACK_STAGE].rd) ,	// input [(ADD_BUS_WIDTH-1):0] rd
 		.rddata(pipeline[WRITEBACK_STAGE].rddata) ,	// input [(WSIZE-1):0] rddata
 		.imm(pipeline[EXECUTION_STAGE].imm) ,	// input [(WSIZE-1):0] imm
-		.inst_write_rd(pipeline[WRITEBACK_STAGE].inst_write_rd), 	// input  inst_write_rd
+		.inst_write_rd(pipeline[WRITEBACK_STAGE].inst_write_rd & !pipeline[WRITEBACK_STAGE].inst_write_fp_regs), 	// input  inst_write_rd
 		.test_register(test_register)
 	);
 	
-	fp_register_bank register_bank
+	register_bank fp_register_bank
 	(
 		.clk(clk) ,	// input  clk
 		.n_rst(n_rst) ,	// input  n_rst
 		.ena(pipeline[WRITEBACK_STAGE].valid),
-		.rs1(pipeline[EXECUTION_STAGE].fprs1) ,	// input [(ADD_BUS_WIDTH-1):0]
-		.rs2(pipeline[EXECUTION_STAGE].fprs2) ,	// input [(ADD_BUS_WIDTH-1):0]
+		.rs1(pipeline[EXECUTION_STAGE].rs1) ,	// input [(ADD_BUS_WIDTH-1):0]
+		.rs2(pipeline[EXECUTION_STAGE].rs2) ,	// input [(ADD_BUS_WIDTH-1):0]
 		.rs1data(fprs1data),	// output [(WSIZE-1):0]
 		.rs2data(fprs2data),	// output [(WSIZE-1):0]
 		.rd(pipeline[WRITEBACK_STAGE].rd) ,	// input [(ADD_BUS_WIDTH-1):0] rd
 		.rddata(pipeline[WRITEBACK_STAGE].rddata) ,	// input [(WSIZE-1):0] rddata
 		.imm(pipeline[EXECUTION_STAGE].imm) ,	// input [(WSIZE-1):0] imm
-		.inst_write_rd(pipeline[WRITEBACK_STAGE].inst_write_rd), 	// input  inst_write_rd
+		.inst_write_rd(pipeline[WRITEBACK_STAGE].inst_write_rd & pipeline[WRITEBACK_STAGE].inst_write_fp_regs) 	// input  inst_write_rd
 	);
 	
 	// Op builder
@@ -271,9 +290,16 @@ module cpu (
 		.A(A),
 		.B(B),
 		.op(op),
+		.op_fp(op_fp),
 		.jal_return_address(jal_return_address),
-		.branch_condition(branch_condition)
+		.branch_condition(branch_condition),
+		.inst_write_fp_regs(write_fp_regs),
+		.inst_result_fp_alu(result_fp_alu)
 	);
+	
+	assign fp_alu_working = result_fp_alu;
+	
+	wire [31:0] int_alu_result;
 	
 	// ALU
 	ALU alu_inst (
@@ -281,19 +307,20 @@ module cpu (
 		.op(op),
 		.A(A),
 		.B(B),
-		.result(alu_result)
+		.result(int_alu_result)
 	);
 	
 	fp_alu dut (
         .clk(clk),
-        .start(fp_alu_start),
+        .start(fp_alu_working),
 		  .done(fp_alu_done),
-		  .ena(pipeline[EXECUTION_STAGE].valid),
         .a(A),
         .b(B),
         .op(op_fp),
         .result(fp_alu_result)
     );
+	 
+	assign alu_result = result_fp_alu ? fp_alu_result : int_alu_result;
 	
 	always_comb begin
 		execution_ff_d = 'x;
@@ -312,6 +339,9 @@ module cpu (
 		execution_ff_d.inst_change_pc_request = pipeline[EXECUTION_STAGE].inst_change_pc_request;
 		execution_ff_d.rs1data = !forward_A ? rs1data : pipeline[forward_A_from].rddata;
 		execution_ff_d.rs2data = !forward_B ? rs2data : pipeline[forward_B_from].rddata;
+		execution_ff_d.fprs1data = !forward_A ? fprs1data : pipeline[forward_A_from].rddata;
+		execution_ff_d.fprs2data = !forward_B ? fprs2data : pipeline[forward_B_from].rddata;
+		execution_ff_d.inst_write_fp_regs = write_fp_regs;
 	end
 	
 	ff #(.SIZE(STAGE_SIZE)) execution_stage (
@@ -359,7 +389,7 @@ module cpu (
 	
 	wire mem_readys [NUM_DEVICES] = '{clock_a_sig, rom_clk};
 	
-	assign reg_write_port = pipeline[MEMORY_STAGE].rs2data;
+	assign reg_write_port = pipeline[MEMORY_STAGE].opcode == STORE_FP ? pipeline[MEMORY_STAGE].fprs2data : pipeline[MEMORY_STAGE].rs2data;
 	
 	mmi #(
 		 .WORD_SIZE(WORD_SIZE),
@@ -378,7 +408,6 @@ module cpu (
 		 .address(base_addr),
 		 .data_out(reg_write_port),
 		 .data_in(reg_read_port),
-		 //.mem_ready(mem_ready),
 		 .mem_write(pipeline[MEMORY_STAGE].inst_write_mem)
 	);
 	
@@ -448,6 +477,7 @@ module cpu (
 		memory_ff_d.rddata = (pipeline[MEMORY_STAGE].inst_read_mem || pipeline[MEMORY_STAGE].inst_write_mem) ? reg_read_port : pipeline[MEMORY_STAGE].rddata;
 		memory_ff_d.inst_write_rd = (pipeline[MEMORY_STAGE].inst_read_mem) ? mem_ready : pipeline[MEMORY_STAGE].inst_write_rd;
 		memory_ff_d.inst_change_pc_request = pipeline[MEMORY_STAGE].inst_change_pc_request;
+		memory_ff_d.inst_write_fp_regs = pipeline[MEMORY_STAGE].inst_write_fp_regs;
 	end
 	
 	ff #(.SIZE(STAGE_SIZE)) memory_stage (

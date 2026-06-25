@@ -20,6 +20,10 @@ module halt_control(
 	
 	input logic branch_taken,
 	
+	// fpu control
+	input logic fp_alu_working,
+	input logic fp_alu_done,
+	
 	output reg [NUM_STAGES-1:0] stage_enable,
 	output reg [NUM_STAGES-1:0] stage_flush
 );
@@ -115,6 +119,10 @@ module halt_control(
 			if (branch_taken) begin
 				stage_flush[FETCH_STAGE] 	= 1'b1;
             stage_flush[DECODE_STAGE] 	= 1'b1;
+			end
+			
+			if (fp_alu_working & !fp_alu_done) begin
+				stage_enable 	= {NUM_STAGES{1'b0}};
 			end
 		end
 	end

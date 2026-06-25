@@ -50,4 +50,14 @@ package fp_ops;
 				 FP_F2UI : FP_F2I_LAT
 		};
 		
+		typedef logic [4:0] FUNC5;
+		localparam FUNC5 FUNC5_LUT [2 ** $bits(FP_OPS)] = '{
+				 default : 5'd0,
+				 FP_ADD  : 5'b00000,
+				 FP_SUB  : 5'b00001,
+				 FP_DIV	: 5'b00011,
+				 FP_MUL  : 5'b00010,
+				 FP_SQRT : 5'b01011
+		};
+		
 endpackage
